@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.eclipse.orbit.bundles:com.google.gson:2.8.2.v20180104-1110">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/orbit/bundles/com.google.gson/2.8.2.v20180104-1110/com.google.gson-2.8.2.v20180104-1110.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/orbit/bundles/com.google.gson/2.8.2.v20180104-1110/com.google.gson-2.8.2.v20180104-1110-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/orbit/bundles/com.google.gson/2.8.2.v20180104-1110/com.google.gson-2.8.2.v20180104-1110-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

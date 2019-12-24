@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="8.12">
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\.classpath">
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\pom.xml">
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\README.md">
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\src\main\java\org\openhab\binding\votecmodule\internal\VotecModuleBindingConstants.java">
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\src\main\java\org\openhab\binding\votecmodule\internal\VotecModuleConfiguration.java">
+<error line="20" severity="warning" message="Classes/Interfaces should be annotated with @NonNullByDefault" source="org.openhab.tools.analysis.checkstyle.NullAnnotationsCheck"/>
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\src\main\java\org\openhab\binding\votecmodule\internal\VotecModuleHandler.java">
+<error line="49" severity="info" message="Comment matches to-do format &apos;(TODO)|(FIXME)&apos;." source="com.puppycrawl.tools.checkstyle.checks.TodoCommentCheck"/>
+<error line="52" severity="info" message="Comment matches to-do format &apos;(TODO)|(FIXME)&apos;." source="com.puppycrawl.tools.checkstyle.checks.TodoCommentCheck"/>
+<error line="66" severity="info" message="Comment matches to-do format &apos;(TODO)|(FIXME)&apos;." source="com.puppycrawl.tools.checkstyle.checks.TodoCommentCheck"/>
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\src\main\java\org\openhab\binding\votecmodule\internal\VotecModuleHandlerFactory.java">
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\src\main\resources\ESH-INF\binding\binding.xml">
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\src\main\resources\ESH-INF\i18n\votecmodule_xx_XX.properties">
+</file>
+<file name="C:\Users\spolat\Desktop\openhab-addons-master\bundles\org.openhab.binding.votecmodule\src\main\resources\ESH-INF\thing\thing-types.xml">
+</file>
+</checkstyle>

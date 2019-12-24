@@ -1,0 +1,4 @@
+org\openhab\binding\votecmodule\internal\VotecModuleBindingConstants.class
+org\openhab\binding\votecmodule\internal\VotecModuleConfiguration.class
+org\openhab\binding\votecmodule\internal\VotecModuleHandlerFactory.class
+org\openhab\binding\votecmodule\internal\VotecModuleHandler.class
