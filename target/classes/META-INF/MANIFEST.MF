@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Automatic-Module-Name: org.openhab.binding.votecmodule
-Bnd-LastModified: 1577191585356
+Bnd-LastModified: 1577283132195
 Bundle-Description: This project contains the official add-ons of open
  HAB
 Bundle-Developers: openhab;email="info@openhab.org";name=openHAB;organ
@@ -21,12 +21,14 @@ Bundle-SCM: url="https://github.com/openhab/openhab2-addons/org.openha
  D
 Bundle-SymbolicName: org.openhab.binding.votecmodule
 Bundle-Vendor: openHAB.org
-Bundle-Version: 3.0.0.201912241246
+Bundle-Version: 3.0.0.201912251412
 Created-By: 1.8.0_231 (Oracle Corporation)
-Import-Package: org.eclipse.smarthome.core.thing,org.eclipse.smarthome
- .core.thing.binding,org.eclipse.smarthome.core.types,org.eclipse.smar
- thome.io.transport.serial,org.apache.commons.io;version="[2.2,3)",org
- .slf4j;version="[1.7,2)"
+Export-Package: org.openhab.binding.votecmodule;version="3.0.0"
+Import-Package: org.eclipse.smarthome.core.library.types,org.eclipse.s
+ marthome.core.thing,org.eclipse.smarthome.core.thing.binding,org.ecli
+ pse.smarthome.core.types,org.eclipse.smarthome.io.transport.serial,or
+ g.openhab.binding.votecmodule,org.apache.commons.io;version="[2.2,3)"
+ ,org.slf4j;version="[1.7,2)"
 Private-Package: ESH-INF.binding,ESH-INF.i18n,ESH-INF.thing,org.openha
  b.binding.votecmodule.internal
 Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse

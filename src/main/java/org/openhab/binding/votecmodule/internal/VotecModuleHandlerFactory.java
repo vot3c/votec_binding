@@ -62,7 +62,6 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
         if (thingTypeUID.equals(VotecModuleBindingConstants.THING_TYPE_SAMPLE)) {
             return new VotecModuleHandler(thing, serialPortManager);
         }
-
         return null;
 
     }

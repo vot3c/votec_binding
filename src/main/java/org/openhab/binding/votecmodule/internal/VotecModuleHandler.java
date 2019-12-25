@@ -22,8 +22,8 @@ import java.util.TooManyListenersException;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.CommonTriggerEvents;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
@@ -36,6 +36,7 @@ import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
 import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
+import org.openhab.binding.votecmodule.DataConvertor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +56,8 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
     private final SerialPortManager serialPortManager;
 
     private SerialPortIdentifier portId;
-    private SerialPort serialPort;
 
+    private SerialPort serialPort;
     private InputStream inputStream;
 
     private OutputStream outputStream;
@@ -83,20 +84,21 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
         }
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused" })
     @Override
     public void initialize() {
         // logger.debug("Start initializing!");
         config = getConfigAs(VotecModuleConfiguration.class);
-        String port = "COM4";
+        // PORT HERE
+        String port1 = "COM2";
 
-        if (port == null) {
+        if (port1 == null) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, "Port must be set!");
             return;
         }
 
         // parse ports and if the port is found, initialize the reader
-        portId = serialPortManager.getIdentifier(port);
+        portId = serialPortManager.getIdentifier(port1);
         if (portId == null) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, "Port is not known!");
             return;
@@ -105,14 +107,16 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
         // initialize serial port
         try {
             serialPort = portId.open(getThing().getUID().toString(), 2000);
+
             serialPort.addEventListener(this);
 
             // activate the DATA_AVAILABLE notifier
             serialPort.notifyOnDataAvailable(true);
             inputStream = serialPort.getInputStream();
             outputStream = serialPort.getOutputStream();
-
+            outputStream.write(DataConvertor.toByteArray("I_GCID"));
             updateStatus(ThingStatus.ONLINE);
+
         } catch (final IOException ex) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, "I/O error!");
         } catch (PortInUseException e) {
@@ -129,6 +133,7 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
         if (serialPort != null) {
             serialPort.close();
         }
+
         IOUtils.closeQuietly(inputStream);
     }
 
@@ -156,10 +161,22 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
                         }
 
                     } while (inputStream.available() > 0);
-
-                    triggerChannel(VotecModuleBindingConstants.TRIGGER_CHANNEL, CommonTriggerEvents.PRESSED);
+                    /*
+                     * *
+                     *
+                     * Serial Input received.
+                     */
+                    // String channelIdString = getThing().getChannels().get(1).getUID().getId();
+                    updateState("channel1", new StringType(res));
                     logger.warn(res);
-                    outputStream.write(10);
+                    logger.warn(Integer.toHexString(255));
+                    outputStream.write(Integer.parseInt("FC", 16));
+                    /*
+                     * *
+                     * Integer.parseInt("FC",16) -> byte (11111100)
+                     * Integer.toHexString(255) ->String ("ff")
+                     */
+
                     res = "";
                 } catch (IOException e1) {
                     logger.debug("Error reading from serial port: {}", e1.getMessage(), e1);
