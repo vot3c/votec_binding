@@ -35,7 +35,6 @@ import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
-import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,8 +111,7 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
             outputStream = serialPort.getOutputStream();
             outputStream.write(DataConvertor.toByteArray("VG_?SID*"));
             // updateStatus(ThingStatus.ONLINE);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
-                    VotecModuleBindingConstants.OFFLINE_SERIAL_NOTFOUND + port);
+            updateStatus(ThingStatus.ONLINE);
 
         } catch (final IOException ex) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, "I/O error!");
