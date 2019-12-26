@@ -25,7 +25,7 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.openhab.binding.votecmodule.handler.VotecModuleHandler;
+import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -61,7 +61,7 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(VotecModuleBindingConstants.THING_TYPE_SAMPLE)) {
-            return new VotecModuleHandler(thing, serialPortManager);
+            return new VotecSerialHandler(thing, serialPortManager);
         }
         return null;
 

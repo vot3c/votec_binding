@@ -34,7 +34,7 @@ public class VotecModuleBindingConstants {
 
     public static final String TRIGGER_CHANNEL = "button";
 
-    public static final String PARAMETER_CONFIG = "port";
+    public static final String CONFIGURATION_PORT = "port";
 
     // Serial Configs
     public static final int BOUD_RATE = 9600;
