@@ -10,18 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.votecmodule.internal;
+package org.openhab.binding.votecmodule.handler;
 
 import static org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants.CHANNEL_1;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.TooManyListenersException;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
@@ -36,7 +34,8 @@ import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
 import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
-import org.openhab.binding.votecmodule.DataConvertor;
+import org.openhab.binding.votecmodule.internal.DataConvertor;
+import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +49,6 @@ import org.slf4j.LoggerFactory;
 public class VotecModuleHandler extends BaseThingHandler implements SerialPortEventListener {
 
     private final Logger logger = LoggerFactory.getLogger(VotecModuleHandler.class);
-
-    private @Nullable VotecModuleConfiguration config;
 
     private final SerialPortManager serialPortManager;
 
@@ -87,18 +84,18 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
     @SuppressWarnings({ "unused" })
     @Override
     public void initialize() {
-        // logger.debug("Start initializing!");
-        config = getConfigAs(VotecModuleConfiguration.class);
+        logger.debug("Votec Module Binding Initializing!");
+        String port = "";
+        port = (String) getConfig().get("CONFIGURATION_PORT");
         // PORT HERE
-        String port1 = "COM2";
-
-        if (port1 == null) {
+        if (port == null || port.length() == 0) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, "Port must be set!");
             return;
         }
 
+        logger.warn("Conecting to Serial Port " + port);
         // parse ports and if the port is found, initialize the reader
-        portId = serialPortManager.getIdentifier(port1);
+        portId = serialPortManager.getIdentifier(port);
         if (portId == null) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR, "Port is not known!");
             return;
@@ -109,13 +106,14 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
             serialPort = portId.open(getThing().getUID().toString(), 2000);
 
             serialPort.addEventListener(this);
-
             // activate the DATA_AVAILABLE notifier
             serialPort.notifyOnDataAvailable(true);
             inputStream = serialPort.getInputStream();
             outputStream = serialPort.getOutputStream();
-            outputStream.write(DataConvertor.toByteArray("I_GCID"));
-            updateStatus(ThingStatus.ONLINE);
+            outputStream.write(DataConvertor.toByteArray("VG_?SID*"));
+            // updateStatus(ThingStatus.ONLINE);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
+                    VotecModuleBindingConstants.OFFLINE_SERIAL_NOTFOUND + port);
 
         } catch (final IOException ex) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, "I/O error!");
@@ -143,16 +141,16 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
             case SerialPortEvent.DATA_AVAILABLE:
                 // we get here if data has been received
                 String res = "";
+                int[] readBuffer = new int[16];
                 try {
                     do {
                         // read data from serial device
-                        int[] readBuffer = new int[10];
+
                         int i = 0;
                         while (inputStream.available() > 0) {
                             readBuffer[i] = inputStream.read();
                             i++;
                         }
-                        res = Arrays.toString(readBuffer);
                         try {
                             // add wait states around reading the stream, so that interrupted transmissions are merged
                             Thread.sleep(100);
@@ -167,10 +165,25 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
                      * Serial Input received.
                      */
                     // String channelIdString = getThing().getChannels().get(1).getUID().getId();
+
+                    boolean f = false;
+                    String dataString = "";
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (int i = 0; i < readBuffer.length; i++) {
+                        if ((readBuffer[i] == 42)) {
+                            f = true;
+                            i++;
+                        }
+                        if (f) {
+                            dataString = Integer.toHexString(readBuffer[i]);
+                            if (dataString.length() < 2) {
+                                dataString = "0" + dataString;
+                            }
+                            stringBuilder.append(dataString + ":");
+                        }
+                    }
+                    res = stringBuilder.toString();
                     updateState("channel1", new StringType(res));
-                    logger.warn(res);
-                    logger.warn(Integer.toHexString(255));
-                    outputStream.write(Integer.parseInt("FC", 16));
                     /*
                      * *
                      * Integer.parseInt("FC",16) -> byte (11111100)

@@ -35,4 +35,10 @@ public class VotecModuleBindingConstants {
     public static final String TRIGGER_CHANNEL = "button";
 
     public static final String PARAMETER_CONFIG = "port";
+
+    // Serial Configs
+    public static final int BOUD_RATE = 9600;
+
+    public final static String OFFLINE_SERIAL_NOTFOUND = "Port is not known: ";
+
 }

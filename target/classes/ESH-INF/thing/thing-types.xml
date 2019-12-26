@@ -14,9 +14,9 @@
 		</channels>
 
 		<config-description>
-			<parameter name="config1" type="text" required="true">
-				<label>Sample Parameter</label>
-				<description>This is a sample text configuration parameter</description>
+			<parameter name="CONFIGURATION_PORT" type="text" required="true">
+				<label>Serial Port</label>
+				<description>Enter Votec Module Controller Serial Port Id ( like:COM3)</description>
 			</parameter>
 		</config-description>
 
@@ -33,4 +33,4 @@
 	
 	
 
-</thing:thing-descriptions>
+</thing:thing-descriptions> 
