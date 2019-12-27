@@ -2,21 +2,25 @@ package org.openhab.binding.votecmodule.handler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 
-import org.eclipse.smarthome.core.library.types.StringType;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.io.transport.serial.SerialPort;
 import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
+import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
+import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VotecSerialHandler extends VotecModuleHandler {
+public class VotecSerialHandler extends VotecModuleHandler implements SerialPortEventListener {
 
     private final Logger logger = LoggerFactory.getLogger(VotecModuleHandler.class);
 
@@ -31,6 +35,10 @@ public class VotecSerialHandler extends VotecModuleHandler {
     private VotecEventListener eventListener = null;
 
     private InputStream inputStream;
+
+    private OutputStream outputStream;
+
+    private SerialMessage serialMessage;
 
     public VotecSerialHandler(Thing thing, SerialPortManager serialPortManager) {
         super(thing, serialPortManager);
@@ -61,15 +69,33 @@ public class VotecSerialHandler extends VotecModuleHandler {
                         VotecModuleBindingConstants.OFFLINE_SERIAL_NOTFOUND + portId);
                 return;
             }
+
             serialPort = portIdentifier.open(getThing().getThingTypeUID().getAsString(), 2000);
             serialPort.setSerialPortParams(VotecModuleBindingConstants.BOUD_RATE, SerialPort.DATABITS_8,
                     SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+            serialPort.addEventListener(this);
+            serialPort.notifyOnDataAvailable(true);
+
             inputStream = serialPort.getInputStream();
+            outputStream = serialPort.getOutputStream();
+
+            serialMessage = new SerialMessage();
+            updateStatus(ThingStatus.ONLINE);
 
         } catch (Exception e) {
             // TODO: handle exception
+            e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (serialPort != null) {
+            serialPort.close();
+        }
+        IOUtils.closeQuietly(inputStream);
     }
 
     @Override
@@ -78,16 +104,16 @@ public class VotecSerialHandler extends VotecModuleHandler {
             case SerialPortEvent.DATA_AVAILABLE:
                 // we get here if data has been received
                 String res = "";
-                int[] readBuffer = new int[16];
                 try {
                     do {
                         // read data from serial device
-
+                        int[] readBuffer = new int[10];
                         int i = 0;
                         while (inputStream.available() > 0) {
                             readBuffer[i] = inputStream.read();
                             i++;
                         }
+                        res = Arrays.toString(readBuffer);
                         try {
                             // add wait states around reading the stream, so that interrupted transmissions are merged
                             Thread.sleep(100);
@@ -96,41 +122,10 @@ public class VotecSerialHandler extends VotecModuleHandler {
                         }
 
                     } while (inputStream.available() > 0);
-                    /*
-                     * *
-                     *
-                     * Serial Input received.
-                     */
-                    // String channelIdString = getThing().getChannels().get(1).getUID().getId();
 
-                    boolean f = false;
-                    String dataString = "";
-                    StringBuilder stringBuilder = new StringBuilder();
-                    for (int i = 0; i < readBuffer.length; i++) {
-                        if ((readBuffer[i] == 42)) {
-                            f = true;
-                            i++;
-                        }
-                        if (f) {
-                            dataString = Integer.toHexString(readBuffer[i]);
-                            if (dataString.length() < 2) {
-                                dataString = "0" + dataString;
-                            }
-                            stringBuilder.append(dataString + ":");
-                        }
-                    }
-                    res = stringBuilder.toString();
-                    updateState("channel1", new StringType(res));
-                    // TODO: Listener Here
-
-                    eventListener.VotecIncomingEvent(res);
-
-                    /*
-                     * *
-                     * Integer.parseInt("FC",16) -> byte (11111100)
-                     * Integer.toHexString(255) ->String ("ff")
-                     */
-
+                    logger.warn(res);
+                    outputStream.write(10);
+                    serialMessage.setMessage(res);
                     res = "";
                 } catch (IOException e1) {
                     logger.debug("Error reading from serial port: {}", e1.getMessage(), e1);
@@ -140,19 +135,4 @@ public class VotecSerialHandler extends VotecModuleHandler {
                 break;
         }
     }
-
-    /**
-     * @return the eventListener
-     */
-    public VotecEventListener getEventListener() {
-        return eventListener;
-    }
-
-    /**
-     * @param eventListener the eventListener to set
-     */
-    public void setEventListener(VotecEventListener eventListener) {
-        this.eventListener = eventListener;
-    }
-
 }

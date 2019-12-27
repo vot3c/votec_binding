@@ -20,10 +20,10 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.io.transport.serial.SerialPort;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEvent;
-import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
+import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
+import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author codigger - Initial contribution
  */
 
-public class VotecModuleHandler extends BaseThingHandler implements SerialPortEventListener {
+public class VotecModuleHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(VotecModuleHandler.class);
 
@@ -46,6 +46,10 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
     private InputStream inputStream;
 
     private OutputStream outputStream;
+
+    SerialMessage serialMessage;
+
+    boolean flag = true;
 
     public VotecModuleHandler(Thing thing, final SerialPortManager serialPortManager) {
         super(thing);
@@ -60,13 +64,17 @@ public class VotecModuleHandler extends BaseThingHandler implements SerialPortEv
     }
 
     @Override
-    public void serialEvent(SerialPortEvent event) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void initialize() {
+        VotecEventListener mListener = new VotecEventListener() {
+
+            @Override
+            public void VotecIncomingEvent(String event) {
+                logger.warn("Hello my old friend" + event);
+            }
+        };
+        serialMessage = new SerialMessage();
+        serialMessage.addListener(mListener);
+
     }
 
 }
