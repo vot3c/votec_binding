@@ -54,7 +54,7 @@ public class VotecSerialHandler extends VotecModuleHandler implements SerialPort
 
         if (portId == null || portId.length() == 0) {
             logger.debug("Votec Serial Controller is not set");
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR);
+            updateStatus(org.openhab.core.thing.ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR);
             return;
         }
 

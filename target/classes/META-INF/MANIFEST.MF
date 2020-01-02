@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Automatic-Module-Name: org.openhab.binding.votecmodule
-Bnd-LastModified: 1577457560160
+Bnd-LastModified: 1578037141295
 Bundle-Description: This project contains the official add-ons of open
  HAB
 Bundle-Developers: openhab;email="info@openhab.org";name=openHAB;organ
@@ -21,27 +21,20 @@ Bundle-SCM: url="https://github.com/openhab/openhab2-addons/org.openha
  D
 Bundle-SymbolicName: org.openhab.binding.votecmodule
 Bundle-Vendor: openHAB.org
-Bundle-Version: 3.0.0.201912271439
+Bundle-Version: 3.0.0.202001030739
 Created-By: 1.8.0_231 (Oracle Corporation)
 Export-Package: org.openhab.binding.votecmodule.handler;version="3.0.0
- ";uses:="org.eclipse.smarthome.core.thing,org.eclipse.smarthome.core.
- thing.binding,org.eclipse.smarthome.core.types,org.eclipse.smarthome.
- io.transport.serial"
-Import-Package: org.eclipse.smarthome.config.core,org.eclipse.smarthom
- e.core.thing,org.eclipse.smarthome.core.thing.binding,org.eclipse.sma
- rthome.core.types,org.eclipse.smarthome.io.transport.serial,org.apach
- e.commons.io;version="[2.2,3)",org.slf4j;version="[1.7,2)"
+ "
+Import-Package: org.openhab.core.thing,org.slf4j;version="[1.7,2)"
 Private-Package: ESH-INF.binding,ESH-INF.i18n,ESH-INF.thing,org.openha
  b.binding.votecmodule.internal,org.openhab.binding.votecmodule.intern
  al.protocol,org.openhab.binding.votecmodule.internal.protocol.event
-Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse
- .smarthome.core.thing.binding.ThingHandlerFactory";uses:="org.eclipse
- .smarthome.core.thing.binding"
-Require-Capability: osgi.service;filter:="(objectClass=org.eclipse.sma
- rthome.io.transport.serial.SerialPortManager)";effective:=active,osgi
- .extender;filter:="(&(osgi.extender=osgi.component)(version>=1.4.0)(!
- (version>=2.0.0)))",osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))
- "
+Provide-Capability: osgi.service;objectClass:List<String>=ThingHandler
+ Factory
+Require-Capability: osgi.service;filter:="(objectClass=SerialPortManag
+ er)";effective:=active,osgi.extender;filter:="(&(osgi.extender=osgi.c
+ omponent)(version>=1.4.0)(!(version>=2.0.0)))",osgi.ee;filter:="(&(os
+ gi.ee=JavaSE)(version=1.8))"
 Service-Component: OSGI-INF/org.openhab.binding.votecmodule.internal.V
  otecModuleHandlerFactory.xml
 Tool: Bnd-4.3.0.201909301554

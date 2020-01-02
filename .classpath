@@ -28,5 +28,25 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/spolat/.m2/repository/org/openhab/core/bundles/org.openhab.core.thing/3.0.0-SNAPSHOT/org.openhab.core.thing-3.0.0-SNAPSHOT.jar" sourcepath="C:/Users/spolat/.m2/repository/org/openhab/core/bundles/org.openhab.core.thing/3.0.0-SNAPSHOT/org.openhab.core.thing-3.0.0-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+			<attribute name="maven.groupId" value="org.openhab.core.bundles"/>
+			<attribute name="maven.artifactId" value="org.openhab.core.thing"/>
+			<attribute name="maven.version" value="3.0.0-SNAPSHOT"/>
+			<attribute name="maven.scope" value="runtime"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/spolat/.m2/repository/org/openhab/core/bundles/org.openhab.core/3.0.0-SNAPSHOT/org.openhab.core-3.0.0-SNAPSHOT.jar" sourcepath="C:/Users/spolat/.m2/repository/org/openhab/core/bundles/org.openhab.core/3.0.0-SNAPSHOT/org.openhab.core-3.0.0-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+			<attribute name="maven.groupId" value="org.openhab.core.bundles"/>
+			<attribute name="maven.artifactId" value="org.openhab.core"/>
+			<attribute name="maven.version" value="3.0.0-SNAPSHOT"/>
+			<attribute name="maven.scope" value="runtime"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
