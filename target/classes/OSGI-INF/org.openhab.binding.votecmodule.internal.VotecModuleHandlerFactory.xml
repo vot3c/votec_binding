@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.openhab.binding.votecmodule.internal.VotecModuleHandlerFactory" configuration-pid="binding.votecmodule">
   <service>
-    <provide interface="ThingHandlerFactory"/>
+    <provide interface="org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory"/>
   </service>
-  <reference name="SerialPortManager" interface="SerialPortManager" bind="setSerialPortManager" unbind="unsetSerialPortManager"/>
+  <reference name="SerialPortManager" interface="org.eclipse.smarthome.io.transport.serial.SerialPortManager" bind="setSerialPortManager" unbind="unsetSerialPortManager"/>
   <implementation class="org.openhab.binding.votecmodule.internal.VotecModuleHandlerFactory"/>
 </scr:component>

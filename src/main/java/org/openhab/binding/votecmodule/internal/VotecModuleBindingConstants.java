@@ -13,7 +13,7 @@
 package org.openhab.binding.votecmodule.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.thing.ThingTypeUID;
+import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
 /**
  * The {@link VotecModuleBindingConstants} class defines common constants, which are
@@ -37,7 +37,7 @@ public class VotecModuleBindingConstants {
     public static final String CONFIGURATION_PORT = "port";
 
     // Serial Configs
-    public static final int BOUD_RATE = 9600;
+    public static final int BOUD_RATE = 115200;
 
     public final static String OFFLINE_SERIAL_NOTFOUND = "Port is not known: ";
 

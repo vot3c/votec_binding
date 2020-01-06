@@ -14,14 +14,18 @@ package org.openhab.binding.votecmodule.handler;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.io.transport.serial.SerialPort;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
+import org.openhab.binding.votecmodule.internal.CommandConstants;
+import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
 import org.slf4j.Logger;
@@ -43,6 +47,7 @@ public class VotecModuleHandler extends BaseThingHandler {
     private SerialPortIdentifier portId;
 
     private SerialPort serialPort;
+
     private InputStream inputStream;
 
     private OutputStream outputStream;
@@ -65,15 +70,25 @@ public class VotecModuleHandler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        VotecEventListener mListener = new VotecEventListener() {
+        serialMessage = new SerialMessage();
+        VotecSerialHandler.sendPackage(CommandConstants.CONTROLLER_GET_ID.getBytes());
+
+        VotecEventListener controllerListener = new VotecEventListener() {
 
             @Override
-            public void VotecIncomingEvent(String event) {
-                logger.warn("Hello my old friend" + event);
+            public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
+                if (command.isEmpty()) {
+                    logger.warn("Command is empty");
+                }
+                if (DataConvertor.arrayToString(command).equals(CommandConstants.CONTROLLER_SET_ID)) {
+                    logger.warn("Command has found");
+                    updateStatus(ThingStatus.ONLINE);
+                }
+
             }
         };
-        serialMessage = new SerialMessage();
-        serialMessage.addListener(mListener);
+
+        serialMessage.addListener(controllerListener);
 
     }
 

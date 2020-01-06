@@ -12,12 +12,15 @@ public class SerialMessage {
 
     private static ArrayList<VotecEventListener> listeners = new ArrayList<VotecEventListener>();
 
-    String message;
+    ArrayList<Integer> message = null;
+    ArrayList<Integer> command = null;
+    ArrayList<Integer> data = null;
 
-    public void setMessage(String mString) {
-        this.message = mString;
+    public void setMessage(ArrayList<Integer> incomingArrayList) {
+        this.message = incomingArrayList;
+        parseMessage();
         for (VotecEventListener votecEventListener : listeners) {
-            votecEventListener.VotecIncomingEvent(mString);
+            votecEventListener.VotecIncomingEvent(getCommand(), getData());
         }
     }
 
@@ -37,4 +40,38 @@ public class SerialMessage {
         }
 
     }
+
+    public void parseMessage() {
+        if (message.isEmpty()) {
+            logger.warn("Input Message is empty!");
+            return;
+        }
+        int star = message.indexOf(42);
+        int hash = message.indexOf(35);
+
+        command = new ArrayList<Integer>();
+        data = new ArrayList<Integer>();
+
+        if (star > 0) {
+            for (int i = 0; i < star; i++) {
+                command.add(message.get(i));
+            }
+        }
+        logger.warn(command.toString());
+        if (hash > star) {
+            for (int i = star + 1; i < hash; i++) {
+                data.add(message.get(i));
+            }
+        }
+        logger.warn(data.toString());
+    }
+
+    public ArrayList<Integer> getCommand() {
+        return this.command;
+    }
+
+    public ArrayList<Integer> getData() {
+        return this.data;
+    }
+
 }
