@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Automatic-Module-Name: org.openhab.binding.votecmodule
-Bnd-LastModified: 1578311172205
+Bnd-LastModified: 1578474609147
 Bundle-Description: This project contains the official add-ons of open
  HAB
 Bundle-Developers: openhab;email="info@openhab.org";name=openHAB;organ
@@ -12,25 +12,30 @@ Bundle-License: "Eclipse Public License 2.0";link="https://www.eclipse
  .org/legal/epl-2.0/"
 Bundle-ManifestVersion: 2
 Bundle-Name: openHAB Add-ons :: Bundles :: VotecModule Binding
-Bundle-SCM: url="https://github.com/openhab/openhab2-addons/org.openha
- b.addons.reactor.bundles/org.openhab.binding.votecmodule",connection=
- "scm:git:https://github.com/openhab/openhab2-addons.git/org.openhab.a
- ddons.reactor.bundles/org.openhab.binding.votecmodule",developer-conn
- ection="scm:git:https://github.com/openhab/openhab2-addons.git/org.op
- enhab.addons.reactor.bundles/org.openhab.binding.votecmodule",tag=HEA
- D
+Bundle-SCM: url="https://github.com/openhab/openhab-addons/org.openhab
+ .addons.reactor.bundles/org.openhab.binding.votecmodule",connection="
+ scm:git:https://github.com/openhab/openhab-addons.git/org.openhab.add
+ ons.reactor.bundles/org.openhab.binding.votecmodule",developer-connec
+ tion="scm:git:https://github.com/openhab/openhab-addons.git/org.openh
+ ab.addons.reactor.bundles/org.openhab.binding.votecmodule",tag=HEAD
 Bundle-SymbolicName: org.openhab.binding.votecmodule
 Bundle-Vendor: openHAB.org
-Bundle-Version: 2.5.1.202001061146
+Bundle-Version: 2.5.1.202001080910
 Created-By: 1.8.0_231 (Oracle Corporation)
-Export-Package: org.openhab.binding.votecmodule.handler;version="2.5.1
- ";uses:="org.eclipse.smarthome.core.thing,org.eclipse.smarthome.core.
- thing.binding,org.eclipse.smarthome.core.types,org.eclipse.smarthome.
- io.transport.serial"
+Export-Package: org.openhab.binding.votecmodule.discovery;version="2.5
+ .1";uses:="org.eclipse.smarthome.config.discovery,org.eclipse.smartho
+ me.core.thing",org.openhab.binding.votecmodule.handler;version="2.5.1
+ ";uses:="org.eclipse.smarthome.config.core.status,org.eclipse.smartho
+ me.core.thing,org.eclipse.smarthome.core.thing.binding,org.eclipse.sm
+ arthome.core.types,org.eclipse.smarthome.io.transport.serial",org.ope
+ nhab.binding.votecmodule.model;version="2.5.1"
 Import-Package: org.eclipse.smarthome.config.core,org.eclipse.smarthom
- e.core.thing,org.eclipse.smarthome.core.thing.binding,org.eclipse.sma
- rthome.core.types,org.eclipse.smarthome.io.transport.serial,org.apach
- e.commons.io;version="[2.2,3)",org.slf4j;version="[1.7,2)"
+ e.config.core.status,org.eclipse.smarthome.config.discovery,org.eclip
+ se.smarthome.core.library.types,org.eclipse.smarthome.core.thing,org.
+ eclipse.smarthome.core.thing.binding,org.eclipse.smarthome.core.types
+ ,org.eclipse.smarthome.io.transport.serial,org.openhab.binding.votecm
+ odule.model,org.apache.commons.io;version="[2.2,3)",org.osgi.framewor
+ k;version="[1.8,2)",org.slf4j;version="[1.7,2)"
 Private-Package: ESH-INF.binding,ESH-INF.i18n,ESH-INF.thing,org.openha
  b.binding.votecmodule.internal,org.openhab.binding.votecmodule.intern
  al.protocol,org.openhab.binding.votecmodule.internal.protocol.event,o

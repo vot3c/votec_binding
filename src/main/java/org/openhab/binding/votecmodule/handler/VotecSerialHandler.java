@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.TooManyListenersException;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.io.transport.serial.PortInUseException;
@@ -22,9 +22,9 @@ import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VotecSerialHandler extends VotecModuleHandler implements SerialPortEventListener {
+public class VotecSerialHandler extends VotecControllerHandler implements SerialPortEventListener {
 
-    private final Logger logger = LoggerFactory.getLogger(VotecModuleHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(VotecControllerHandler.class);
 
     private String portId;
 
@@ -40,9 +40,8 @@ public class VotecSerialHandler extends VotecModuleHandler implements SerialPort
 
     private SerialMessage serialMessage;
 
-    public VotecSerialHandler(Thing thing, SerialPortManager serialPortManager) {
+    public VotecSerialHandler(Bridge thing, SerialPortManager serialPortManager) {
         super(thing, serialPortManager);
-        // TODO Auto-generated constructor stub
         this.serialPortManager = serialPortManager;
     }
 
@@ -111,10 +110,23 @@ public class VotecSerialHandler extends VotecModuleHandler implements SerialPort
     }
 
     // TODO: optimize sendPackage method.
+    static public void sendPackage(String data) {
+        if (data.length() < 1) {
+            return;
+        }
+
+        try {
+            outputStream.write(data.getBytes());
+        } catch (IOException e) {
+
+        }
+    }
+
     static public void sendPackage(byte[] data) {
         if (data.length < 1) {
             return;
         }
+
         try {
             outputStream.write(data);
         } catch (IOException e) {
@@ -129,15 +141,13 @@ public class VotecSerialHandler extends VotecModuleHandler implements SerialPort
                 ArrayList<Integer> readBuffer = null;
 
                 try {
-                    readBuffer = new ArrayList<>();
+                    readBuffer = new ArrayList<Integer>();
 
                     while (inputStream.available() > 0) {
                         readBuffer.add(inputStream.read());
                     }
-
                     logger.warn("Input data: " + readBuffer);
-                    serialMessage.setMessage(readBuffer);
-
+                    splitMessage(readBuffer);
                 } catch (IOException e1) {
                     logger.debug("Error reading from serial port: {}", e1.getMessage(), e1);
                 }
@@ -145,6 +155,18 @@ public class VotecSerialHandler extends VotecModuleHandler implements SerialPort
             default:
                 break;
         }
+    }
+
+    public void splitMessage(ArrayList<Integer> message) {
+        ArrayList<Integer> tempArrayList = new ArrayList<Integer>();
+        for (int i : message) {
+            tempArrayList.add(i);
+            if (i == 35) {
+                serialMessage.setMessage(tempArrayList);
+                tempArrayList = new ArrayList<Integer>();
+            }
+        }
+
     }
 
 }

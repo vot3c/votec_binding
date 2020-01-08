@@ -5,8 +5,8 @@
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
 	<!-- Sample Thing Type -->
-	<thing-type id="sample">
-		<label>VotecModule Binding Thing</label>
+	<bridge-type id="sample">
+		<label>Votec Controller</label>
 		<description>Sample thing for VotecModule Binding</description>
 
 		<channels>
@@ -20,7 +20,7 @@
 			</parameter>
 		</config-description>
 
-	</thing-type>
+	</bridge-type>
 
 
 	<!-- Sample Channel Type -->

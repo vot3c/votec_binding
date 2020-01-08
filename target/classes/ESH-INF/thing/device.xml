@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="votecmodule"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+  xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0
+                      http://eclipse.org/smarthome/schemas/thing-description/v1.0.0">
+  <thing-type id="votec_output_10" listed="false">
+    <label>votec_output_module_10</label>
+    <description>
+      <![CDATA[
+      Votec Output Module<br /><h1>Overview</h1><p>This Product can controller up to 10 device.</p>
+      ]]>
+    </description>
+    <category>Output Module</category>
+    
+    
+    <!-- CHANNEL DEFINITIONS -->
+    <channels>
+      <channel id="switch_binary" typeId="system.rawbutton">
+        <label>R1</label>
+      </channel>
+    </channels>
+   
+
+
+  </thing-type>
+</thing:thing-descriptions>

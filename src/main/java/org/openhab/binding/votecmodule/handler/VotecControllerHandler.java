@@ -16,10 +16,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import org.eclipse.smarthome.core.library.types.StringType;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
+import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.io.transport.serial.SerialPort;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
@@ -28,19 +29,20 @@ import org.openhab.binding.votecmodule.internal.CommandConstants;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
+import org.openhab.binding.votecmodule.model.VotecCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link VotecModuleHandler} is responsible for handling commands, which are
+ * The {@link VotecControllerHandler} is responsible for handling commands, which are
  * sent to one of the channels.
  *
  * @author codigger - Initial contribution
  */
 
-public class VotecModuleHandler extends BaseThingHandler {
+public class VotecControllerHandler extends BaseBridgeHandler implements VotecEventListener {
 
-    private final Logger logger = LoggerFactory.getLogger(VotecModuleHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(VotecControllerHandler.class);
 
     private final SerialPortManager serialPortManager;
 
@@ -52,43 +54,43 @@ public class VotecModuleHandler extends BaseThingHandler {
 
     private OutputStream outputStream;
 
-    SerialMessage serialMessage;
+    SerialMessage serialMessage = new SerialMessage();;
 
     boolean flag = true;
 
-    public VotecModuleHandler(Thing thing, final SerialPortManager serialPortManager) {
+    public VotecControllerHandler(Bridge thing, final SerialPortManager serialPortManager) {
         super(thing);
         this.serialPortManager = serialPortManager;
 
     }
 
     @Override
-    public void handleCommand(ChannelUID channelUID, Command command) {
-        // TODO Auto-generated method stub
+    public void initialize() {
+        VotecSerialHandler.sendPackage(CommandConstants.CONTROLLER_GET_ID);
+        serialMessage.addListener(this);
 
     }
 
     @Override
-    public void initialize() {
-        serialMessage = new SerialMessage();
-        VotecSerialHandler.sendPackage(CommandConstants.CONTROLLER_GET_ID.getBytes());
+    public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
+        // TODO Auto-generated method stub
 
-        VotecEventListener controllerListener = new VotecEventListener() {
+        if (command.isEmpty()) {
+            logger.warn("Command is empty");
+        }
+        if (DataConvertor.arrayToString(command).equals(CommandConstants.CONTROLLER_SET_ID)) {
+            logger.warn("Votec Controller Recognized. Device ID: " + data.toString());
+            updateStatus(ThingStatus.ONLINE);
+            updateState("channel1", new StringType(data.toString()));
+            VotecCommand votecCommand = new VotecCommand();
 
-            @Override
-            public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
-                if (command.isEmpty()) {
-                    logger.warn("Command is empty");
-                }
-                if (DataConvertor.arrayToString(command).equals(CommandConstants.CONTROLLER_SET_ID)) {
-                    logger.warn("Command has found");
-                    updateStatus(ThingStatus.ONLINE);
-                }
+        }
 
-            }
-        };
+    }
 
-        serialMessage.addListener(controllerListener);
+    @Override
+    public void handleCommand(ChannelUID channelUID, Command command) {
+        // TODO Auto-generated method stub
 
     }
 

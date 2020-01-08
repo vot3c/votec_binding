@@ -2,13 +2,13 @@ package org.openhab.binding.votecmodule.internal.protocol;
 
 import java.util.ArrayList;
 
-import org.openhab.binding.votecmodule.handler.VotecModuleHandler;
+import org.openhab.binding.votecmodule.handler.VotecControllerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SerialMessage {
 
-    private final Logger logger = LoggerFactory.getLogger(VotecModuleHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(VotecControllerHandler.class);
 
     private static ArrayList<VotecEventListener> listeners = new ArrayList<VotecEventListener>();
 
@@ -57,13 +57,11 @@ public class SerialMessage {
                 command.add(message.get(i));
             }
         }
-        logger.warn(command.toString());
         if (hash > star) {
             for (int i = star + 1; i < hash; i++) {
                 data.add(message.get(i));
             }
         }
-        logger.warn(data.toString());
     }
 
     public ArrayList<Integer> getCommand() {

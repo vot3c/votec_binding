@@ -29,6 +29,8 @@ public class VotecModuleBindingConstants {
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "sample");
 
+    public final static String VOTEC_THING = BINDING_ID + "a";
+
     // List of all Channel ids
     public static final String CHANNEL_1 = "channel1";
 
@@ -40,5 +42,7 @@ public class VotecModuleBindingConstants {
     public static final int BOUD_RATE = 115200;
 
     public final static String OFFLINE_SERIAL_NOTFOUND = "Port is not known: ";
+
+    public final static int TIMEOUT = 10;
 
 }
