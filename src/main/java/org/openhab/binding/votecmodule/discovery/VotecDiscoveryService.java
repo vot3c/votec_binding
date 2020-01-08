@@ -67,10 +67,18 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     }
 
     @Override
+    protected synchronized void stopScan() {
+        // TODO Auto-generated method stub
+        super.stopScan();
+        // removeOlderResults(getTimestampOfLastScan());
+    }
+
+    @Override
     public synchronized void abortScan() {
         // TODO Auto-generated method stub
         super.abortScan();
         serialMessage.removeListener(this);
+        // removeOlderResults(getTimestampOfLastScan());
     }
 
     @Override
@@ -86,7 +94,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     public void addDevice(String data) {
 
         ThingUID thingUID = new ThingUID(VotecModuleBindingConstants.VOTEC_THING, controller.getUID(),
-                "nodess" + Integer.toString(nodeId));
+                "node" + Integer.toString(nodeId));
 
         Map<String, Object> propertiesMap = new HashMap<String, Object>();
         propertiesMap.put("node_id", Integer.toString(nodeId));
@@ -94,11 +102,9 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
         DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID)
                 .withThingType(new ThingTypeUID("votecmodule", "votec_output_10")).withProperties(propertiesMap)
-                .withLabel("VotecOutputModule").withBridge(controller.getBridgeUID()).build();
+                .withLabel("Votec Output Module").withBridge(controller.getBridgeUID()).build();
+
         thingDiscovered(discoveryResult);
-
-        logger.warn("node " + Integer.toString(nodeId) + " has added");
-
     }
 
 }

@@ -1,20 +1,15 @@
 package org.openhab.binding.votecmodule.handler;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.ConfigStatusThingHandler;
+import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ModulesHandler extends ConfigStatusThingHandler {
+public class ModulesHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(ModulesHandler.class);
 
@@ -24,6 +19,11 @@ public class ModulesHandler extends ConfigStatusThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
+        String nodeId = thing.getProperties().get("node_id");
+        if (nodeId.equals("20")) {
+
+        }
+
         logger.warn("switch toogled");
     }
 
@@ -35,14 +35,22 @@ public class ModulesHandler extends ConfigStatusThingHandler {
     }
 
     @Override
-    public Collection<@NonNull ConfigStatusMessage> getConfigStatus() {
-        Collection<ConfigStatusMessage> collection = new ArrayList<>();
-        return collection;
+    public void handleUpdate(ChannelUID channelUID, State newState) {
+        logger.warn("uptade recieved");
     }
 
     @Override
-    public void handleUpdate(ChannelUID channelUID, State newState) {
-        logger.warn("uptade recieved");
+    public void channelLinked(ChannelUID channelUID) {
+        // TODO Auto-generated method stub
+        super.channelLinked(channelUID);
+        logger.warn("channel linked");
+    }
+
+    @Override
+    public void channelUnlinked(ChannelUID channelUID) {
+        // TODO Auto-generated method stub
+        super.channelUnlinked(channelUID);
+        logger.warn("channel unlinked");
     }
 
 }

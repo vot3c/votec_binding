@@ -16,12 +16,24 @@
     
     <!-- CHANNEL DEFINITIONS -->
     <channels>
-      <channel id="switch_binary" typeId="system.rawbutton">
-        <label>R1</label>
+      <channel id="button" typeId="button">
+        <label>Relay 1</label>
+      </channel>
+      <channel id="button1" typeId="button">
+        <label>Relay 2</label>
+      </channel>
+      <channel id="button2" typeId="button">
+        <label>Relay 3</label>
+      </channel>
+      <channel id="button3" typeId="button">
+        <label>Relay 4</label>
       </channel>
     </channels>
-   
-
-
   </thing-type>
+  
+    <channel-type id="button">
+        <item-type>Switch</item-type>
+        <label>Button Event</label>
+        <description>Fires when the button is pressed</description>
+    </channel-type>
 </thing:thing-descriptions>

@@ -1,16 +1,38 @@
 package org.openhab.binding.votecmodule.model;
 
+import java.util.Arrays;
+
 import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
 
+/*
+ *
+ */
+
 public class VotecCommand {
+    byte[] command;
+    byte[] data;
     byte[] packet;
 
     public VotecCommand() {
-        packet = new byte[4];
-        if (setOta(3) && setBroadcast(7) && setGroupId(31) && setSubGroupId(31) && setDeviceId(127)
-                && setAtomicId(125)) {
-            VotecSerialHandler.sendPackage(packet);
-            System.out.println(toString());
+        command = new byte[4];
+        data = new byte[8];
+        packet = new byte[12];
+        if (setOta(3) && setBroadcast(0x07) && setGroupId(0x1F) && setSubGroupId(0x1F) && setDeviceId(0x7F)
+                && setAtomicId(0x7D)) {
+            VotecSerialHandler.sendPackage(command);
+            buildPacket();
+            System.out.println(Arrays.toString(this.packet));
+        }
+
+    }
+
+    public void buildPacket() {
+        for (int i = 0; i < 12; i++) {
+            if (i < 4) {
+                packet[i] = command[i];
+            } else {
+                packet[i] = data[i - 4];
+            }
         }
     }
 
@@ -18,17 +40,46 @@ public class VotecCommand {
         this.packet = mPacket;
     }
 
+    public boolean setData(byte[] data) {
+        if (data.length == 8) {
+            this.data = data;
+            return true;
+        }
+        return false;
+    }
+
+    public byte[] getPacket() {
+        if (this.packet != null) {
+            return this.packet;
+        }
+        return new byte[0];
+    }
+
+    public byte[] getData() {
+        if (this.data != null) {
+            return this.data;
+        }
+        return new byte[0];
+    }
+
+    public byte[] getCommand() {
+        if (this.command != null) {
+            return this.command;
+        }
+        return new byte[0];
+    }
+
     public boolean setOta(int ota) {
         if (ota > 3) {
             return false;
         }
-        packet[3] = (byte) ota;
+        command[3] = (byte) ota;
         return true;
     }
 
     public int getOta() {
         int ota = 0;
-        ota = packet[3] & 3;
+        ota = command[3] & 3;
         return ota;
     }
 
@@ -38,14 +89,14 @@ public class VotecCommand {
             return false;
         }
         broadcast = (byte) (broadcast << 2);
-        broadcast = broadcast | packet[3];
-        packet[3] = (byte) broadcast;
+        broadcast = broadcast | command[3];
+        command[3] = (byte) broadcast;
         return true;
     }
 
     public int getBroadcast() {
         int broadcast = 0;
-        broadcast = (packet[3] & 28) >> 2;
+        broadcast = (command[3] & 0x1C) >> 2;
         return broadcast;
     }
 
@@ -55,17 +106,17 @@ public class VotecCommand {
         }
         int groupIdUpperBits = groupId >> 3;
 
-        groupId = groupId << 5 & 255 | packet[3];
-        packet[3] = (byte) groupId;
-        packet[2] = (byte) groupIdUpperBits;
+        groupId = groupId << 5 & 0xFF | command[3];
+        command[3] = (byte) groupId;
+        command[2] = (byte) groupIdUpperBits;
 
         return true;
     }
 
     public int getGroupId() {
         int groupId = 0;
-        groupId = (packet[3] & 224) >> 5;
-        groupId = groupId | ((packet[2] & 3) << 3);
+        groupId = (command[3] & 0xFE) >> 5;
+        groupId = groupId | ((command[2] & 3) << 3);
         return groupId;
     }
 
@@ -73,14 +124,14 @@ public class VotecCommand {
         if (sGroupId > 31) {
             return false;
         }
-        sGroupId = (sGroupId << 2) | packet[2];
-        packet[2] = (byte) sGroupId;
+        sGroupId = (sGroupId << 2) | command[2];
+        command[2] = (byte) sGroupId;
         return true;
     }
 
     public int getSubGroupId() {
         int subGroupId = 0;
-        subGroupId = (packet[2] & 124) >> 2;
+        subGroupId = (command[2] & 0x7C) >> 2;
         return subGroupId;
     }
 
@@ -90,29 +141,29 @@ public class VotecCommand {
         }
         int deviceIdUpperBits = deviceId >> 1;
 
-        deviceId = ((deviceId & 1) << 7) | packet[2];
-        packet[2] = (byte) deviceId;
-        packet[1] = (byte) deviceIdUpperBits;
+        deviceId = ((deviceId & 1) << 7) | command[2];
+        command[2] = (byte) deviceId;
+        command[1] = (byte) deviceIdUpperBits;
         return true;
     }
 
     public int getDeviceId() {
         int deviceId = 0;
-        deviceId = ((packet[2] & 128) >> 7) | ((packet[1] & 63) << 1);
+        deviceId = ((command[2] & 0x80) >> 7) | ((command[1] & 0x3F) << 1);
         return deviceId;
     }
 
     public boolean setAtomicId(int atomicId) {
-        if (atomicId > 127) {
+        if (atomicId > 0x7F) {
             return false;
         }
 
         int atomicIdUpperBits = atomicId;
-        atomicIdUpperBits = (atomicIdUpperBits & 252) >> 2;
+        atomicIdUpperBits = (atomicIdUpperBits & 0xFC) >> 2;
 
-        atomicId = ((atomicId & 3) << 6) | packet[1];
-        packet[1] = (byte) atomicId;
-        packet[0] = (byte) atomicIdUpperBits;
+        atomicId = ((atomicId & 3) << 6) | command[1];
+        command[1] = (byte) atomicId;
+        command[0] = (byte) atomicIdUpperBits;
 
         return true;
     }
@@ -120,14 +171,13 @@ public class VotecCommand {
     public int getAtomicId() {
         int atomicId = 0;
 
-        atomicId = ((packet[1] & 192) >> 6) | ((packet[0] & 31) << 2);
+        atomicId = ((command[1] & 0xC0) >> 6) | ((command[0] & 0x1F) << 2);
 
         return atomicId;
     }
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
         String toString = "OTA: " + getOta() + ", BRO: " + getBroadcast() + ", GID: " + getGroupId() + ", SGI: "
                 + getSubGroupId() + ", DID: " + getDeviceId() + ", AID: " + getAtomicId();
         return toString;

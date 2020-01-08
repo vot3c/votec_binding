@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Automatic-Module-Name: org.openhab.binding.votecmodule
-Bnd-LastModified: 1578474609147
+Bnd-LastModified: 1578494600224
 Bundle-Description: This project contains the official add-ons of open
  HAB
 Bundle-Developers: openhab;email="info@openhab.org";name=openHAB;organ
@@ -20,26 +20,25 @@ Bundle-SCM: url="https://github.com/openhab/openhab-addons/org.openhab
  ab.addons.reactor.bundles/org.openhab.binding.votecmodule",tag=HEAD
 Bundle-SymbolicName: org.openhab.binding.votecmodule
 Bundle-Vendor: openHAB.org
-Bundle-Version: 2.5.1.202001080910
+Bundle-Version: 2.5.1.202001081443
 Created-By: 1.8.0_231 (Oracle Corporation)
 Export-Package: org.openhab.binding.votecmodule.discovery;version="2.5
  .1";uses:="org.eclipse.smarthome.config.discovery,org.eclipse.smartho
  me.core.thing",org.openhab.binding.votecmodule.handler;version="2.5.1
- ";uses:="org.eclipse.smarthome.config.core.status,org.eclipse.smartho
- me.core.thing,org.eclipse.smarthome.core.thing.binding,org.eclipse.sm
- arthome.core.types,org.eclipse.smarthome.io.transport.serial",org.ope
- nhab.binding.votecmodule.model;version="2.5.1"
+ ";uses:="org.eclipse.smarthome.core.thing,org.eclipse.smarthome.core.
+ thing.binding,org.eclipse.smarthome.core.types,org.eclipse.smarthome.
+ io.transport.serial",org.openhab.binding.votecmodule.model;version="2
+ .5.1"
 Import-Package: org.eclipse.smarthome.config.core,org.eclipse.smarthom
- e.config.core.status,org.eclipse.smarthome.config.discovery,org.eclip
- se.smarthome.core.library.types,org.eclipse.smarthome.core.thing,org.
- eclipse.smarthome.core.thing.binding,org.eclipse.smarthome.core.types
- ,org.eclipse.smarthome.io.transport.serial,org.openhab.binding.votecm
- odule.model,org.apache.commons.io;version="[2.2,3)",org.osgi.framewor
- k;version="[1.8,2)",org.slf4j;version="[1.7,2)"
+ e.config.discovery,org.eclipse.smarthome.core.library.types,org.eclip
+ se.smarthome.core.thing,org.eclipse.smarthome.core.thing.binding,org.
+ eclipse.smarthome.core.types,org.eclipse.smarthome.io.transport.seria
+ l,org.openhab.binding.votecmodule.model,org.apache.commons.io;version
+ ="[2.2,3)",org.osgi.framework;version="[1.8,2)",org.slf4j;version="[1
+ .7,2)"
 Private-Package: ESH-INF.binding,ESH-INF.i18n,ESH-INF.thing,org.openha
  b.binding.votecmodule.internal,org.openhab.binding.votecmodule.intern
- al.protocol,org.openhab.binding.votecmodule.internal.protocol.event,o
- rg.openhab.binding.votecmodule.internal.protocol.listeners
+ al.protocol,org.openhab.binding.votecmodule.internal.protocol.event
 Provide-Capability: osgi.service;objectClass:List<String>="org.eclipse
  .smarthome.core.thing.binding.ThingHandlerFactory";uses:="org.eclipse
  .smarthome.core.thing.binding"
