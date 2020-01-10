@@ -18,15 +18,7 @@
 				<label>Serial Port</label>
 				<description>Enter Votec Module Controller Serial Port Id ( like:COM3)</description>
 			</parameter>
-			
-<!--    <properties> -->
-<!--       <property name="type">0x00</property> -->
-<!--       <property name="model">0x00</property> -->
-<!--       <property name="firmwareVersion">0x00</property>  -->
-<!--       <property name="serialNumber">0x00000000</property> -->
-<!--     </properties> -->
-
-		</config-description>
+        </config-description>
 
 	
 	</bridge-type>

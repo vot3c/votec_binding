@@ -20,6 +20,7 @@ import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
+import org.openhab.binding.votecmodule.model.VotecCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +46,11 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     @Override
     protected void startScan() {
         // TODO get all devices.
+        removeOlderResults(getTimestampOfLastScan());
         logger.warn("Discovery started");
-        VotecSerialHandler.sendPackage(CommandConstants.SCAN_NETWORK);
+        VotecCommand scanCommand = new VotecCommand();
+        scanCommand.setBroadcast(2);
+        VotecSerialHandler.sendPackage(scanCommand.getPacket());
         serialMessage.addListener(this);
     }
 
@@ -70,7 +74,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     protected synchronized void stopScan() {
         // TODO Auto-generated method stub
         super.stopScan();
-        // removeOlderResults(getTimestampOfLastScan());
+        removeOlderResults(getTimestampOfLastScan());
     }
 
     @Override
@@ -78,20 +82,18 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
         // TODO Auto-generated method stub
         super.abortScan();
         serialMessage.removeListener(this);
-        // removeOlderResults(getTimestampOfLastScan());
+        removeOlderResults(getTimestampOfLastScan());
     }
 
     @Override
     public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
         // TODO Auto-generated method stub
         if (DataConvertor.arrayToString(command).equals(CommandConstants.SCAN_NETWORK_RESULT)) {
-            logger.warn("Device found: " + data.toString());
-            nodeId = nodeId + 1;
-            addDevice(data.toString());
+            addDevice(data);
         }
     }
 
-    public void addDevice(String data) {
+    public void addDevice(ArrayList<Integer> data) {
 
         ThingUID thingUID = new ThingUID(VotecModuleBindingConstants.VOTEC_THING, controller.getUID(),
                 "node" + Integer.toString(nodeId));
@@ -105,6 +107,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
                 .withLabel("Votec Output Module").withBridge(controller.getBridgeUID()).build();
 
         thingDiscovered(discoveryResult);
+
     }
 
 }

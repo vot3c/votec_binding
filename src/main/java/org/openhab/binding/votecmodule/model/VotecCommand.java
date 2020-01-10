@@ -1,9 +1,5 @@
 package org.openhab.binding.votecmodule.model;
 
-import java.util.Arrays;
-
-import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
-
 /*
  *
  */
@@ -12,26 +8,25 @@ public class VotecCommand {
     byte[] command;
     byte[] data;
     byte[] packet;
+    byte[] header = new byte[2];
 
     public VotecCommand() {
         command = new byte[4];
         data = new byte[8];
-        packet = new byte[12];
-        if (setOta(3) && setBroadcast(0x07) && setGroupId(0x1F) && setSubGroupId(0x1F) && setDeviceId(0x7F)
-                && setAtomicId(0x7D)) {
-            VotecSerialHandler.sendPackage(command);
-            buildPacket();
-            System.out.println(Arrays.toString(this.packet));
-        }
-
+        packet = new byte[14];
+        header[0] = 0x56;
+        header[1] = 0x2A;
     }
 
     public void buildPacket() {
-        for (int i = 0; i < 12; i++) {
-            if (i < 4) {
-                packet[i] = command[i];
-            } else {
-                packet[i] = data[i - 4];
+        for (int i = 0; i < 14; i++) {
+            if (i < 2) {
+                packet[i] = header[i];
+            }
+            if (i >= 2 && i < 6) {
+                packet[i] = command[i - 2];
+            } else if (i >= 6) {
+                packet[i] = data[i - 6];
             }
         }
     }
@@ -49,6 +44,7 @@ public class VotecCommand {
     }
 
     public byte[] getPacket() {
+        buildPacket();
         if (this.packet != null) {
             return this.packet;
         }

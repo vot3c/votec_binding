@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 public class VotecSerialHandler extends VotecControllerHandler implements SerialPortEventListener {
 
-    private final Logger logger = LoggerFactory.getLogger(VotecControllerHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(VotecSerialHandler.class);
 
     private String portId;
 
@@ -123,12 +123,11 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
     }
 
     static public void sendPackage(byte[] data) {
-        if (data.length < 1) {
-            return;
-        }
 
         try {
-            outputStream.write(data);
+            if (data != null) {
+                outputStream.write(data);
+            }
         } catch (IOException e) {
 
         }

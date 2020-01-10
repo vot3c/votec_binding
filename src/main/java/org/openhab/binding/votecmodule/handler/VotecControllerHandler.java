@@ -66,9 +66,10 @@ public class VotecControllerHandler extends BaseBridgeHandler implements VotecEv
 
     @Override
     public void initialize() {
-        VotecSerialHandler.sendPackage(CommandConstants.CONTROLLER_GET_ID);
+        VotecCommand newCommand = new VotecCommand();
+        newCommand.setBroadcast(1);
+        VotecSerialHandler.sendPackage(newCommand.getPacket());
         serialMessage.addListener(this);
-
     }
 
     @Override
@@ -82,7 +83,6 @@ public class VotecControllerHandler extends BaseBridgeHandler implements VotecEv
             logger.warn("Votec Controller Recognized. Device ID: " + data.toString());
             updateStatus(ThingStatus.ONLINE);
             updateState("channel1", new StringType(data.toString()));
-            VotecCommand votecCommand = new VotecCommand();
 
         }
 
