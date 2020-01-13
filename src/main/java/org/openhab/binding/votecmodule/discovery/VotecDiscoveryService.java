@@ -95,12 +95,14 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
     public void addDevice(ArrayList<Integer> data) {
 
+        logger.warn(controller.getUID().getAsString());
+
         ThingUID thingUID = new ThingUID(VotecModuleBindingConstants.VOTEC_THING, controller.getUID(),
                 "node" + Integer.toString(nodeId));
 
         Map<String, Object> propertiesMap = new HashMap<String, Object>();
         propertiesMap.put("node_id", Integer.toString(nodeId));
-        propertiesMap.put("conf_node_id", nodeId);
+        propertiesMap.put("isConfigureted", 0);
 
         DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID)
                 .withThingType(new ThingTypeUID("votecmodule", "votec_output_10")).withProperties(propertiesMap)

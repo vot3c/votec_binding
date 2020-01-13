@@ -4,11 +4,14 @@
   xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
   xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0
                       http://eclipse.org/smarthome/schemas/thing-description/v1.0.0">
-  <thing-type id="votec_output_10" listed="true">
+
+  
+  
+   <thing-type id="votec_output_10" listed="true">
     <label>votec_output_module_10</label>
     <description>
       <![CDATA[
-      Votec Output Module<br /><h1>Overview</h1><p>This Product can controller up to 10 device.</p>
+      Votec Output Module<br /><p>This Product can controller up to 10 device.</p>
       ]]>
     </description>
     <category>Output Module</category>
@@ -16,63 +19,32 @@
     
     <!-- CHANNEL DEFINITIONS -->
     <channels>
-      <channel id="button" typeId="button">
+      <channel id="relay1" typeId="relay">
         <label>Relay 1</label>
       </channel>
-      <channel id="button1" typeId="blindS">
-        <label>Blind S</label>
-      </channel>
-      <channel id="button2" typeId="button">
-        <label>Blind D</label>
-      </channel>
-      <channel id="button3" typeId="button">
-        <label>Relay 4</label>
+      <channel id="blind1" typeId="blind">
+        <label>Blind 1</label>
       </channel>
     </channels>
+    
+    <config-description>
+      <parameter name="blindNumber" type="integer" required="true" min="0" max="5">
+           <label>Panjur Sayısı</label>
+           <description>Kullanılacak panjur sayısını giriniz.(Max:5)</description>
+       </parameter>
+    </config-description>
+    
   </thing-type>
   
   
-  
-   <thing-type id="votec_output_1" listed="true">
-    <label>votec_output_module_1</label>
-    <description>
-      <![CDATA[
-      Votec Output Module<br /><h1>Overview</h1><p>This Product can controller up to 10 device.</p>
-      ]]>
-    </description>
-    <category>Output Module</category>
-    
-    
-    <!-- CHANNEL DEFINITIONS -->
-    <channels>
-    
-      <channel id="button" typeId="button">
-        <label>Relay 1</label>
-      </channel>
-      <channel id="button1" typeId="blindD">
-        <label>Blind S</label>
-      </channel>
-
-    </channels>
-  
-  </thing-type>
-  
-  
-
-    <channel-type id="button">
+     <channel-type id="relay">
         <item-type>Switch</item-type>
         <label>Button Event</label>
-        <description>Fires when the button is pressed</description>
     </channel-type>
     
-    <channel-type id="blindS">
-        <item-type>Switch</item-type>
-        <label>Blind s</label>
-        <description>Fires when the button is pressed</description>
+    <channel-type id="blind">
+        <item-type>Rollershutter</item-type>
+        <label>Blind 1</label>
     </channel-type>
-       <channel-type id="blindD">
-        <item-type>Switch</item-type>
-        <label>Blind d</label>
-        <description>Fires when the button is pressed</description>
-    </channel-type>
+
 </thing:thing-descriptions>
