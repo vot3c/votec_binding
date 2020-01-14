@@ -80,7 +80,7 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
         }
 
         if (controller != null) {
-            VotecDiscoveryService discoveryService = new VotecDiscoveryService(thing);
+            VotecDiscoveryService discoveryService = new VotecDiscoveryService((Bridge) thing);
             discoveryServiceRegs.put(controller.getThing().getUID(), bundleContext.registerService(
                     DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
 

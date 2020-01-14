@@ -57,9 +57,11 @@ public class VotecControllerHandler extends BaseBridgeHandler implements VotecEv
     SerialMessage serialMessage = new SerialMessage();;
 
     boolean flag = true;
+    static public Bridge controller = null;
 
     public VotecControllerHandler(Bridge thing, final SerialPortManager serialPortManager) {
         super(thing);
+        controller = thing;
         this.serialPortManager = serialPortManager;
 
     }

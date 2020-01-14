@@ -141,6 +141,12 @@ public class VotecCommand {
         return subGroupId;
     }
 
+    /**
+     *
+     * @param deviceId max 127
+     * @return
+     */
+
     public boolean setDeviceId(int deviceId) {
         if (deviceId > 127) {
             return false;

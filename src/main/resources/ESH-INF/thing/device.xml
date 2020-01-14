@@ -22,6 +22,7 @@
       <parameter name="blindNumber" type="integer" required="true" min="0" max="5">
            <label>Panjur Sayısı</label>
            <description>Kullanılacak panjur sayısını giriniz.(Max:5)</description>
+           <default>0</default>
        </parameter>
     </config-description>
     

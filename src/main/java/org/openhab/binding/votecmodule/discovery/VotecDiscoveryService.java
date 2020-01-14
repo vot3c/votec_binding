@@ -5,15 +5,19 @@ import static org.openhab.binding.votecmodule.internal.VotecModuleBindingConstan
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
+import org.openhab.binding.votecmodule.handler.VotecControllerHandler;
 import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
 import org.openhab.binding.votecmodule.internal.CommandConstants;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
@@ -33,11 +37,11 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
     SerialMessage serialMessage = new SerialMessage();
 
-    Thing controller;
+    Bridge controller;
 
-    static int nodeId = 1;
+    static int nodeId = 40;
 
-    public VotecDiscoveryService(Thing thing) {
+    public VotecDiscoveryService(Bridge thing) {
         // TODO Auto-generated constructor stub
         super(SUPPORTED_THING_TYPES_UIDS, VotecModuleBindingConstants.TIMEOUT, true);
         this.controller = thing;
@@ -57,10 +61,6 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     @Override
     protected void activate(Map<String, Object> configProperties) {
         super.activate(configProperties);
-    }
-
-    public void addNode(String node) {
-
     }
 
     @Override
@@ -97,20 +97,66 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
         logger.warn(data.toString());
 
-        nodeId = nodeId + 100;
+        String serialNumberString = data.subList(0, 4).toString();
+
+        // return if that serial number already exist.
+        if (hasDiscovered(serialNumberString)) {
+            logger.warn("Thing already discovered!");
+            return;
+        }
+
+        nodeId = nodeId + 1;
+        logger.warn("addDevice node_id :" + Integer.toString(nodeId));
+
+        String uuid = UUID.randomUUID().toString();
+
+        String thingType = getThingType(data.get(4));
+
         ThingUID thingUID = new ThingUID(VotecModuleBindingConstants.VOTEC_THING, controller.getUID(),
-                "node" + Integer.toString(nodeId));
+                thingType + "_" + uuid);
+
+        logger.warn("NEW THING: " + thingUID.getAsString());
 
         Map<String, Object> propertiesMap = new HashMap<String, Object>();
         propertiesMap.put("node_id", Integer.toString(nodeId));
-        propertiesMap.put("serial_number", data.subList(0, 4).toString());
+        propertiesMap.put("serial_number", serialNumberString);
 
         DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID)
-                .withThingType(new ThingTypeUID("votecmodule", "votec_output_10")).withProperties(propertiesMap)
-                .withLabel("Votec Output Module").withBridge(controller.getBridgeUID()).build();
+                .withThingType(new ThingTypeUID("votecmodule", thingType)).withProperties(propertiesMap)
+                .withLabel("Votec Output Module: ").withBridge(controller.getBridgeUID()).build();
 
         thingDiscovered(discoveryResult);
 
+    }
+
+    public String getThingType(int id) {
+        String thingType = "";
+
+        switch (id) {
+            case 20:
+                thingType = "votec_output_10";
+                break;
+
+            default:
+                break;
+        }
+
+        return thingType;
+    }
+
+    public boolean hasDiscovered(String serialNumber) {
+        List<Thing> things = VotecControllerHandler.controller.getThings();
+        logger.warn("size of things: " + things.size());
+
+        for (int i = 0; i < things.size(); i++) {
+            if (things.get(i).getProperties().containsKey("serial_number")) {
+                String mSerialNumberString = things.get(i).getProperties().get("serial_number");
+                if (serialNumber.equals(mSerialNumberString)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
