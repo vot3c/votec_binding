@@ -97,52 +97,55 @@ public class ChannelHandler {
     public Thing removeChannel(ChannelUID toRemove) {
         ThingBuilder mThingBuilder = thingBuilder;
         mThingBuilder.withoutChannel(channelUID);
-        return mThingBuilder.build();
+        Thing thing = mThingBuilder.build();
+        logger.warn("channel removed!");
+        return thing;
     }
 
-    // TODO: Creating new Channels requires a channel instance
-    @SuppressWarnings("null")
+    /**
+     * @param type to create channel by ChannelTypUID.
+     *            example: "votecmoudle:blind".
+     */
     public Thing addChannel(String type) {
-        // votecmodule:votec_output_10:89e71138:relay1
+
         List<Channel> channels = thing.getChannels();
-        int channelTypeId = 1;
-        Channel channel = null;
+        int channelNodeId = 1;
+        String mType = type;
 
         for (int i = 0; i < channels.size(); i++) {
-            if (channels.get(i).getChannelTypeUID().getAsString().equals(type)) {
-                channelTypeId = channelTypeId + 1;
-                channel = channels.get(i);
+            ChannelTypeUID channelType = channels.get(i).getChannelTypeUID();
+            if (channelType != null) {
+                if (channelType.getAsString().equals(mType)) {
+                    channelNodeId = channelNodeId + 1;
+                }
             }
 
         }
-        String[] typeStrings = type.split(":");
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID(mType);
+
+        String[] typeStrings = mType.split(":");
 
         if (typeStrings[1].length() > 1) {
-            type = typeStrings[1];
+            mType = typeStrings[1];
         }
 
-        if (channel != null) {
+        // TODO: Implement with more types.
 
-            String acceptedItemType = channel.getAcceptedItemType();
+        String acceptedItemType = mType.equals("blind") ? "Rollershutter" : "Switch";
 
-            ChannelKind kind = channel.getKind();
+        ChannelKind kind = ChannelKind.STATE;
 
-            ChannelUID newChannelUID = new ChannelUID(thing.getUID() + ":" + type + Integer.toString(channelTypeId));
+        ChannelUID newChannelUID = new ChannelUID(thing.getUID() + ":" + mType + "_" + Integer.toString(channelNodeId));
 
-            Channel newChannel = ChannelBuilder.create(newChannelUID, acceptedItemType).withKind(kind)
-                    .withType(channel.getChannelTypeUID()).withLabel(type + " " + Integer.toString(channelTypeId))
-                    .build();
+        Channel newChannel = ChannelBuilder.create(newChannelUID, acceptedItemType).withKind(kind)
+                .withType(channelTypeUID).withLabel(mType + " " + Integer.toString(channelNodeId)).build();
 
-            ThingBuilder mThingBuilder = thingBuilder;
+        ThingBuilder mThingBuilder = thingBuilder;
 
-            mThingBuilder.withChannel(newChannel);
+        mThingBuilder.withChannel(newChannel);
 
-            logger.warn("Channel Created!");
+        return mThingBuilder.build();
 
-            return mThingBuilder.build();
-        }
-
-        return null;
     }
 
     /**

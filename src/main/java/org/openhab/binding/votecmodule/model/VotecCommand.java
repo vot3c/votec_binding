@@ -43,6 +43,16 @@ public class VotecCommand {
         return false;
     }
 
+    public boolean setSerialnumber(byte[] data) {
+        if (data.length == 4) {
+            for (int i = 0; i < data.length; i++) {
+                this.data[i] = data[i];
+            }
+            return true;
+        }
+        return false;
+    }
+
     public byte[] getPacket() {
         buildPacket();
         if (this.packet != null) {

@@ -33,4 +33,22 @@ public class DataConvertor {
         return stringBuilder.toString();
     }
 
+    /**
+     * @param stringIntArray ArrayList<Integer>.toString();
+     * @return
+     */
+    static public byte[] stringIntArrayToByteArray(String stringIntAString) {
+
+        String tempString = stringIntAString.substring(1, stringIntAString.length() - 1);
+        tempString = tempString.replace(" ", "");
+        String[] byteStrings = tempString.split(",");
+        byte[] newByteArr = new byte[byteStrings.length];
+
+        for (int i = 0; i < byteStrings.length; i++) {
+            newByteArr[i] = (byte) Integer.parseInt(byteStrings[i]);
+        }
+
+        return newByteArr;
+    }
+
 }

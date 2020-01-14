@@ -17,16 +17,7 @@
     <category>Output Module</category>
     
     
-    <!-- CHANNEL DEFINITIONS -->
-    <channels>
-      <channel id="relay1" typeId="relay">
-        <label>Relay 1</label>
-      </channel>
-      <channel id="blind1" typeId="blind">
-        <label>Blind 1</label>
-      </channel>
-    </channels>
-    
+
     <config-description>
       <parameter name="blindNumber" type="integer" required="true" min="0" max="5">
            <label>Panjur Sayısı</label>

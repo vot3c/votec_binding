@@ -68,8 +68,9 @@ public class VotecControllerHandler extends BaseBridgeHandler implements VotecEv
     public void initialize() {
         VotecCommand newCommand = new VotecCommand();
         newCommand.setBroadcast(1);
-        VotecSerialHandler.sendPackage(newCommand.getPacket());
         serialMessage.addListener(this);
+        VotecSerialHandler.sendPackage(newCommand.getPacket());
+
     }
 
     @Override
