@@ -82,6 +82,8 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
 
         if (controller != null) {
             VotecDiscoveryService discoveryService = new VotecDiscoveryService((Bridge) thing);
+            discoveryService.activate();
+
             discoveryServiceRegs.put(controller.getThing().getUID(), bundleContext.registerService(
                     DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
 
@@ -92,6 +94,26 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
         registerModuleNodeId(thing);
 
         return new ModulesHandler(thing);
+
+    }
+
+    @Override
+    protected void removeHandler(ThingHandler thingHandler) {
+        // TODO Auto-generated method stub
+        super.removeHandler(thingHandler);
+        if (thingHandler instanceof VotecSerialHandler) {
+            ServiceRegistration<?> serviceRegs = this.discoveryServiceRegs.get(thingHandler.getThing().getUID());
+            if (serviceRegs != null) {
+                VotecDiscoveryService service = (VotecDiscoveryService) bundleContext
+                        .getService(serviceRegs.getReference());
+                if (service != null) {
+                    service.deactivate();
+                }
+
+                serviceRegs.unregister();
+                discoveryServiceRegs.remove(thingHandler.getThing().getUID());
+            }
+        }
 
     }
 

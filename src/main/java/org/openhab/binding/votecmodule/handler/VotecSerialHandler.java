@@ -33,8 +33,6 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
     private final Logger logger = LoggerFactory.getLogger(VotecSerialHandler.class);
 
-    private String portId;
-
     private SerialPortManager serialPortManager;
 
     private SerialPort serialPort;
@@ -47,9 +45,6 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
     private SerialMessage serialMessage;
 
-    boolean isFailed = false;
-    boolean isChecking = true;
-
     public VotecSerialHandler(Bridge thing, SerialPortManager serialPortManager) {
         super(thing, serialPortManager);
         this.serialPortManager = serialPortManager;
@@ -59,9 +54,19 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
     public void initialize() {
         logger.debug("Votec Serial Controller Initializing ..");
 
-        updateStatus(ThingStatus.UNKNOWN);
+        serialMessage = new SerialMessage();
+
         super.initialize();
 
+        if (!thing.getStatus().equals(ThingStatus.ONLINE)) {
+            logger.warn("Controller not found looking for it!");
+            updateStatus(ThingStatus.UNKNOWN);
+            configurePort();
+        }
+
+    }
+
+    private void configurePort() {
         Runnable configureRunnable = new Runnable() {
 
             @Override
@@ -79,7 +84,6 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
     }
 
     public void initializePort() {
-        serialMessage = new SerialMessage();
 
         serialMessage.addListener(this);
 
@@ -87,12 +91,8 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
         while (portList.hasMoreElements()) {
 
-            isChecking = true;
-            isFailed = false;
-
             CommPortIdentifier comPort = (CommPortIdentifier) portList.nextElement();
             String port = comPort.getName();
-            System.out.println(port);
 
             portIdentifier = serialPortManager.getIdentifier(port);
 
@@ -106,6 +106,7 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
             } catch (PortInUseException e) {
                 // TODO Auto-generated catch block
                 logger.warn("port in use!");
+                serialPort = null;
                 continue;
             }
 
@@ -115,6 +116,7 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
             } catch (UnsupportedCommOperationException e) {
                 serialPort.close();
                 IOUtils.closeQuietly(inputStream);
+                serialPort = null;
                 logger.warn("unsupported comm operation");
                 continue;
             }
@@ -135,41 +137,38 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
                 outputStream = serialPort.getOutputStream();
             } catch (IOException e) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, "I/O error!");
+                logger.warn("Serial Port I/O error!");
             }
 
             VotecCommand newCommand = new VotecCommand();
             newCommand.setBroadcast(1);
             VotecSerialHandler.sendPackage(newCommand.getPacket());
-            long currentTime = System.currentTimeMillis();
-            while (isChecking) {
-                if ((System.currentTimeMillis() - currentTime) > 1000) {
-                    isChecking = false;
-                    isFailed = true;
-                }
+            long currentMilis = System.currentTimeMillis();
+
+            while (System.currentTimeMillis() - currentMilis < 1000) {
             }
-            if (!isFailed) {
+
+            if (thing.getStatus().equals(ThingStatus.ONLINE)) {
+                logger.warn("On {} Votec Controller Discovered!", port);
                 break;
             } else {
                 serialPort.close();
                 IOUtils.closeQuietly(inputStream);
-            }
-        }
 
+            }
+
+        }
+        serialMessage.removeListener(this);
     }
 
     @Override
     public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
 
-        isChecking = false;
-
         if (DataConvertor.arrayToString(command).equals(CommandConstants.CONTROLLER_SET_ID)) {
             logger.warn("Votec Controller Recognized. Device ID: " + data.toString());
             updateStatus(ThingStatus.ONLINE);
             updateState("channel1", new StringType(data.toString()));
-            isFailed = false;
 
-        } else {
-            isFailed = true;
         }
 
     }
@@ -184,27 +183,37 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
     }
 
     // TODO: optimize sendPackage method.
-    static public void sendPackage(String data) {
+    static public boolean sendPackage(String data) {
         if (data.length() < 1) {
-            return;
+            return false;
+        }
+
+        if (outputStream == null) {
+            return false;
         }
 
         try {
             outputStream.write(data.getBytes());
         } catch (IOException e) {
-
+            return false;
         }
+        return true;
     }
 
-    static public void sendPackage(byte[] data) {
+    public static boolean sendPackage(byte[] data) {
+        if (outputStream == null) {
+            return false;
+        }
 
         try {
             if (data != null) {
                 outputStream.write(data);
             }
         } catch (IOException e) {
-
+            return false;
         }
+        return true;
+
     }
 
     @Override
@@ -225,7 +234,7 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
                 } catch (IOException e1) {
 
-                    logger.debug("Error reading from serial port: {}", e1.getMessage(), e1);
+                    logger.warn("Error reading from serial port: {}", e1.getMessage(), e1);
 
                 }
 

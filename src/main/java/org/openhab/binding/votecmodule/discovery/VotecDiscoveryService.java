@@ -58,18 +58,16 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
         VotecCommand scanCommand = new VotecCommand();
         scanCommand.setBroadcast(2);
         VotecSerialHandler.sendPackage(scanCommand.getPacket());
-        serialMessage.addListener(this);
 
     }
 
-    @Override
-    protected void activate(Map<String, Object> configProperties) {
-        super.activate(configProperties);
+    public void activate() {
         logger.warn("discovery activated!");
+        serialMessage.addListener(this);
     }
 
     @Override
-    protected void deactivate() {
+    public void deactivate() {
         // TODO Auto-generated method stub
         super.deactivate();
         logger.warn("discovery deactivated!");
@@ -83,7 +81,6 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
         logger.warn("discovery stopped!");
         possibleNodes = null;
         avaibleNodeIndex = 0;
-        serialMessage.removeListener(this);
         removeOlderResults(getTimestampOfLastScan());
     }
 
@@ -94,7 +91,6 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
         logger.warn("discovery aborted!");
         possibleNodes = null;
         avaibleNodeIndex = 0;
-        serialMessage.removeListener(this);
         removeOlderResults(getTimestampOfLastScan());
     }
 
