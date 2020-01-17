@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.TooManyListenersException;
 
 import org.apache.commons.io.IOUtils;
@@ -21,6 +22,8 @@ import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import gnu.io.CommPortIdentifier;
 
 public class VotecSerialHandler extends VotecControllerHandler implements SerialPortEventListener {
 
@@ -61,6 +64,12 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
         try {
             portIdentifier = serialPortManager.getIdentifier(portId);
+            Enumeration portList = CommPortIdentifier.getPortIdentifiers();
+
+            while (portList.hasMoreElements()) {
+                CommPortIdentifier comPort = (CommPortIdentifier) portList.nextElement();
+                System.out.println(comPort.getName());
+            }
 
             if (portIdentifier == null) {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
@@ -146,10 +155,15 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
                         readBuffer.add(inputStream.read());
                     }
                     logger.warn("Input data: " + readBuffer);
+
                     splitMessage(readBuffer);
+
                 } catch (IOException e1) {
+
                     logger.debug("Error reading from serial port: {}", e1.getMessage(), e1);
+
                 }
+
                 break;
             default:
                 break;

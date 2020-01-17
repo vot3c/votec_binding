@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="votecmodule"
+<thing:thing-descriptions bindingId="votec"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
   xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0
@@ -7,7 +7,7 @@
 
   
   
-   <thing-type id="votec_output_10" listed="true">
+   <thing-type id="votec_output_10" listed="false">
     <label>votec_output_module_10</label>
     <description>
       <![CDATA[
@@ -19,12 +19,21 @@
     
 
     <config-description>
-      <parameter name="blindNumber" type="integer" required="true" min="0" max="5">
-           <label>Panjur Sayısı</label>
-           <description>Kullanılacak panjur sayısını giriniz.(Max:5)</description>
-           <default>0</default>
+		<parameter name="blindNumber" type="integer" required="true" min="0" max="5">
+		     <label>Panjur Sayısı</label>
+		     <description>Kullanılacak panjur sayısını giriniz.(Max:5)</description>
+		     <default>0</default>
+		</parameter>
+		<parameter name="testMode" type="boolean">
+             <label>Test Mod</label>
+             <description>Cihaz test modunu aktifleştirir.</description>
+             <advanced>true</advanced>
+             <default>false</default>
        </parameter>
+		
     </config-description>
+     
+    
     
   </thing-type>
   

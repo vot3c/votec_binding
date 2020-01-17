@@ -2,7 +2,6 @@ package org.openhab.binding.votecmodule.handler;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -37,18 +36,62 @@ public class ModulesHandler extends ConfigStatusThingHandler {
             refreshFromState(channelUID);
             return;
         }
+
         String string = thing.getProperties().get("serial_number");
+
         byte[] packet = DataConvertor.stringIntArrayToByteArray(string);
+
         VotecCommand votecCommand = new VotecCommand();
+
         votecCommand.setSerialnumber(packet);
 
-        votecCommand.setGroupId(1);
-        String[] channelAtr = channelUID.getId().toString().split("_");
-        if (channelAtr[0].equals("relay")) {
-            votecCommand.setAtomicId(Integer.parseInt(channelAtr[1]));
+        if ((boolean) thing.getConfiguration().get("testMode")) {
+            votecCommand.setGroupId(1);
+        } else {
+            int nodeId = Integer.parseInt(thing.getProperties().get("node_id"));
+            votecCommand.setDeviceId(nodeId);
         }
-        logger.warn(votecCommand.toString());
-        logger.warn(Arrays.toString(votecCommand.getPacket()));
+
+        String[] channelAtr = channelUID.getId().toString().split("_");
+
+        int atomicId = Integer.parseInt(channelAtr[1]);
+
+        votecCommand.setAtomicId(atomicId);
+
+        if (channelAtr[0].equals("relay")) {
+
+            switch (command.toString()) {
+                case "ON":
+
+                    break;
+
+                case "OFF":
+
+                    break;
+
+                default:
+                    break;
+            }
+
+        } else if (channelAtr[0].equals("blind")) {
+            atomicId = (6 - atomicId) * 2;
+            switch (command.toString()) {
+                case "UP":
+
+                    break;
+
+                case "DOWN":
+
+                    break;
+
+                case "STOP":
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
         VotecSerialHandler.sendPackage(votecCommand.getPacket());
 
     }
@@ -60,8 +103,22 @@ public class ModulesHandler extends ConfigStatusThingHandler {
 
     @Override
     public void initialize() {
-        logger.warn("device initialized!");
-        configureChannels();
+        logger.warn("{} initialized!", thing.getLabel());
+
+        Runnable configureRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                configureChannels();
+
+            }
+        };
+
+        Thread configureThread = new Thread(configureRunnable);
+
+        configureThread.start();
+
         updateStatus(ThingStatus.ONLINE);
 
     }
@@ -80,7 +137,7 @@ public class ModulesHandler extends ConfigStatusThingHandler {
         ChannelHandler handler = new ChannelHandler(thing, editThing());
 
         while (relayNumber > 0) {
-            mThing = handler.addChannel("votecmodule:relay");
+            mThing = handler.addChannel("votec:relay");
             if (mThing != null) {
                 updateThing(mThing);
                 handler = new ChannelHandler(thing, editThing());
@@ -90,7 +147,7 @@ public class ModulesHandler extends ConfigStatusThingHandler {
         }
 
         while (blindNumber > 0) {
-            mThing = handler.addChannel("votecmodule:blind");
+            mThing = handler.addChannel("votec:blind");
             if (mThing != null) {
                 updateThing(mThing);
                 handler = new ChannelHandler(thing, editThing());
@@ -104,12 +161,12 @@ public class ModulesHandler extends ConfigStatusThingHandler {
         for (Channel channel : channels) {
             updateThing(editThing().withoutChannel(channel.getUID()).build());
         }
-        logger.warn("All Channels Removed Successfully!");
+
     }
 
     @Override
     public void handleUpdate(ChannelUID channelUID, State newState) {
-        logger.warn("uptade recieved");
+
     }
 
     @Override
@@ -129,7 +186,9 @@ public class ModulesHandler extends ConfigStatusThingHandler {
     @Override
     public void handleConfigurationUpdate(Map<@NonNull String, @NonNull Object> configurationParameters) {
         // TODO Auto-generated method stub
+
         super.handleConfigurationUpdate(configurationParameters);
+
     }
 
     @Override

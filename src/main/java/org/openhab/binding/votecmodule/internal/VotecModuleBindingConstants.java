@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.votecmodule.internal;
 
+import java.util.ArrayList;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
@@ -24,12 +26,12 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 @NonNullByDefault
 public class VotecModuleBindingConstants {
 
-    private static final String BINDING_ID = "votecmodule";
+    public static final String BINDING_ID = "votec";
 
     // List of all Thing Type UIDs
-    public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "sample");
+    public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "can");
 
-    public final static String VOTEC_THING = BINDING_ID;
+    public final static String VOTEC_THING = BINDING_ID + ":device";
 
     // List of all Channel ids
     public static final String CHANNEL_1 = "channel1";
@@ -43,6 +45,8 @@ public class VotecModuleBindingConstants {
 
     public final static String OFFLINE_SERIAL_NOTFOUND = "Port is not known: ";
 
-    public final static int TIMEOUT = 10;
+    public final static int TIMEOUT = 3;
+
+    public static ArrayList<Integer> ADDED_NODES = new ArrayList<Integer>();
 
 }

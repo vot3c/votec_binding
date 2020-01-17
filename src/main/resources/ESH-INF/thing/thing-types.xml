@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<thing:thing-descriptions bindingId="votecmodule"
+<thing:thing-descriptions bindingId="votec"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
 	<!-- Sample Thing Type -->
-	<bridge-type id="sample">
+	<bridge-type id="can">
 		<label>Votec Controller</label>
 		<description>Sample thing for VotecModule Binding</description>
 

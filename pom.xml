@@ -9,8 +9,8 @@
     <version>2.5.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.binding.votecmodule</artifactId>
+  <artifactId>org.openhab.binding.votec</artifactId>
 
-  <name>openHAB Add-ons :: Bundles :: VotecModule Binding</name>
+  <name>openHAB Add-ons :: Bundles :: Votec Binding</name>
 
 </project>

@@ -34,6 +34,7 @@ import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.votecmodule.discovery.VotecDiscoveryService;
 import org.openhab.binding.votecmodule.handler.ModulesHandler;
 import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
+import org.openhab.binding.votecmodule.model.VotecCommand;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -59,7 +60,7 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
-        return thingTypeUID.getBindingId().equals("votecmodule");
+        return thingTypeUID.getBindingId().equals("votec");
     }
 
     @Reference
@@ -88,7 +89,44 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
 
         }
 
+        registerModuleNodeId(thing);
+
         return new ModulesHandler(thing);
+
+    }
+
+    /**
+     * Before Thing created set device id of things.
+     *
+     * @param thing The Thing to set its own properties to module.
+     */
+    public void registerModuleNodeId(Thing thing) {
+
+        if (thing.getProperties().containsKey("serial_number")) {
+
+            String serialNumber = thing.getProperties().get("serial_number");
+
+            if (thing.getProperties().containsKey("node_id")) {
+
+                int deviceId = Integer.parseInt(thing.getProperties().get("node_id").toString());
+
+                VotecCommand command = new VotecCommand();
+
+                command.setSerialnumber(DataConvertor.stringIntArrayToByteArray(serialNumber));
+
+                command.setDeviceId(deviceId);
+
+                command.setBroadcast(1);
+
+                command.setGroupId(1);
+
+                VotecSerialHandler.sendPackage(command.getPacket());
+
+                logger.warn(command.toString());
+
+            }
+
+        }
 
     }
 
