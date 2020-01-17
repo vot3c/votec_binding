@@ -13,14 +13,6 @@
 			<channel id="channel1" typeId="sample-channel" />			
 		</channels>
 
-		<config-description>
-			<parameter name="CONFIGURATION_PORT" type="text" required="true">
-				<label>Serial Port</label>
-				<description>Enter Votec Module Controller Serial Port Id ( like:COM3)</description>
-			</parameter>
-        </config-description>
-
-	
 	</bridge-type>
 
 	<!-- Sample Channel Type -->

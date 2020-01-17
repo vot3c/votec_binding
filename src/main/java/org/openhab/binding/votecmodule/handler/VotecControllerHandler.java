@@ -29,7 +29,6 @@ import org.openhab.binding.votecmodule.internal.CommandConstants;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
-import org.openhab.binding.votecmodule.model.VotecCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,10 +67,6 @@ public class VotecControllerHandler extends BaseBridgeHandler implements VotecEv
 
     @Override
     public void initialize() {
-        VotecCommand newCommand = new VotecCommand();
-        newCommand.setBroadcast(1);
-        serialMessage.addListener(this);
-        VotecSerialHandler.sendPackage(newCommand.getPacket());
 
     }
 

@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.TooManyListenersException;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
@@ -18,8 +19,11 @@ import org.eclipse.smarthome.io.transport.serial.SerialPortEventListener;
 import org.eclipse.smarthome.io.transport.serial.SerialPortIdentifier;
 import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.eclipse.smarthome.io.transport.serial.UnsupportedCommOperationException;
+import org.openhab.binding.votecmodule.internal.CommandConstants;
+import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
+import org.openhab.binding.votecmodule.model.VotecCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +47,9 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
     private SerialMessage serialMessage;
 
+    boolean isFailed = false;
+    boolean isChecking = true;
+
     public VotecSerialHandler(Bridge thing, SerialPortManager serialPortManager) {
         super(thing, serialPortManager);
         this.serialPortManager = serialPortManager;
@@ -52,59 +59,117 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
     public void initialize() {
         logger.debug("Votec Serial Controller Initializing ..");
 
-        portId = (String) getConfig().get("CONFIGURATION_PORT");
+        updateStatus(ThingStatus.UNKNOWN);
+        super.initialize();
 
-        if (portId == null || portId.length() == 0) {
-            logger.debug("Votec Serial Controller is not set");
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.CONFIGURATION_ERROR);
-            return;
-        }
+        Runnable configureRunnable = new Runnable() {
 
-        // TODO:Calling reinitialize method maybe wrong?
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                initializePort();
 
-        try {
-            portIdentifier = serialPortManager.getIdentifier(portId);
-            Enumeration portList = CommPortIdentifier.getPortIdentifiers();
-
-            while (portList.hasMoreElements()) {
-                CommPortIdentifier comPort = (CommPortIdentifier) portList.nextElement();
-                System.out.println(comPort.getName());
             }
+        };
+
+        Thread configureThread = new Thread(configureRunnable);
+
+        configureThread.start();
+
+    }
+
+    public void initializePort() {
+        serialMessage = new SerialMessage();
+
+        serialMessage.addListener(this);
+
+        Enumeration portList = CommPortIdentifier.getPortIdentifiers();
+
+        while (portList.hasMoreElements()) {
+
+            isChecking = true;
+            isFailed = false;
+
+            CommPortIdentifier comPort = (CommPortIdentifier) portList.nextElement();
+            String port = comPort.getName();
+            System.out.println(port);
+
+            portIdentifier = serialPortManager.getIdentifier(port);
 
             if (portIdentifier == null) {
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
-                        VotecModuleBindingConstants.OFFLINE_SERIAL_NOTFOUND + portId);
-                return;
+                logger.warn("port identifier null!");
+                continue;
             }
 
-            serialPort = portIdentifier.open(getThing().getThingTypeUID().getAsString(), 2000);
-            serialPort.setSerialPortParams(VotecModuleBindingConstants.BOUD_RATE, SerialPort.DATABITS_8,
-                    SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+            try {
+                serialPort = portIdentifier.open(getThing().getThingTypeUID().getAsString(), 2000);
+            } catch (PortInUseException e) {
+                // TODO Auto-generated catch block
+                logger.warn("port in use!");
+                continue;
+            }
 
-            serialPort.addEventListener(this);
+            try {
+                serialPort.setSerialPortParams(VotecModuleBindingConstants.BOUD_RATE, SerialPort.DATABITS_8,
+                        SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+            } catch (UnsupportedCommOperationException e) {
+                serialPort.close();
+                IOUtils.closeQuietly(inputStream);
+                logger.warn("unsupported comm operation");
+                continue;
+            }
+
+            try {
+                serialPort.addEventListener(this);
+            } catch (TooManyListenersException e) {
+                serialPort.close();
+                IOUtils.closeQuietly(inputStream);
+                logger.warn("Too Many Listener!");
+                continue;
+            }
+
             serialPort.notifyOnDataAvailable(true);
 
-            inputStream = serialPort.getInputStream();
-            outputStream = serialPort.getOutputStream();
-            serialMessage = new SerialMessage();
+            try {
+                inputStream = serialPort.getInputStream();
+                outputStream = serialPort.getOutputStream();
+            } catch (IOException e) {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, "I/O error!");
+            }
 
-            updateStatus(ThingStatus.UNKNOWN);
-            super.initialize();
+            VotecCommand newCommand = new VotecCommand();
+            newCommand.setBroadcast(1);
+            VotecSerialHandler.sendPackage(newCommand.getPacket());
+            long currentTime = System.currentTimeMillis();
+            while (isChecking) {
+                if ((System.currentTimeMillis() - currentTime) > 1000) {
+                    isChecking = false;
+                    isFailed = true;
+                }
+            }
+            if (!isFailed) {
+                break;
+            } else {
+                serialPort.close();
+                IOUtils.closeQuietly(inputStream);
+            }
+        }
 
-        } catch (PortInUseException e) {
+    }
 
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, "Port is in use!");
-        } catch (final IOException e) {
+    @Override
+    public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
 
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR, "I/O error!");
-        } catch (TooManyListenersException e) {
+        isChecking = false;
 
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
-                    "Cannot attach listener to port!");
-        } catch (UnsupportedCommOperationException e) {
+        if (DataConvertor.arrayToString(command).equals(CommandConstants.CONTROLLER_SET_ID)) {
+            logger.warn("Votec Controller Recognized. Device ID: " + data.toString());
+            updateStatus(ThingStatus.ONLINE);
+            updateState("channel1", new StringType(data.toString()));
+            isFailed = false;
 
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.OFFLINE.COMMUNICATION_ERROR,
-                    "Unsupported Comm Operation!");
+        } else {
+            isFailed = true;
         }
 
     }
