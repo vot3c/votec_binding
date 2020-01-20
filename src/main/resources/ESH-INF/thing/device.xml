@@ -28,7 +28,7 @@
              <label>Test Mod</label>
              <description>Cihaz test modunu aktifleştirir.</description>
              <advanced>true</advanced>
-             <default>false</default>
+             <default>true</default>
        </parameter>
 		
     </config-description>

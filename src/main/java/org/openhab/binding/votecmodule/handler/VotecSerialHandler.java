@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.TooManyListenersException;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.smarthome.core.library.types.StringType;
@@ -23,7 +25,8 @@ import org.openhab.binding.votecmodule.internal.CommandConstants;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
-import org.openhab.binding.votecmodule.model.VotecCommand;
+import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
+import org.openhab.binding.votecmodule.model.commands.ScanController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +48,10 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
     private SerialMessage serialMessage;
 
+    private ScheduledFuture<?> checkController = null;
+
+    boolean toogleMe = true;
+
     public VotecSerialHandler(Bridge thing, SerialPortManager serialPortManager) {
         super(thing, serialPortManager);
         this.serialPortManager = serialPortManager;
@@ -58,6 +65,7 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
         super.initialize();
 
+        initlizeChecker();
         if (!thing.getStatus().equals(ThingStatus.ONLINE)) {
             logger.warn("Controller not found looking for it!");
             updateStatus(ThingStatus.UNKNOWN);
@@ -71,21 +79,71 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
             @Override
             public void run() {
-                // TODO Auto-generated method stub
                 initializePort();
 
             }
+
         };
 
         Thread configureThread = new Thread(configureRunnable);
-
         configureThread.start();
+    }
+
+    public void initlizeChecker() {
+
+        Runnable checkRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                ScanController scanController = new ScanController();
+                toogleMe = true;
+
+                VotecEventListener listener = new VotecEventListener() {
+
+                    @Override
+                    public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
+                        if (DataConvertor.arrayToString(command).equals(CommandConstants.CONTROLLER_SET_ID)) {
+                            updateStatus(ThingStatus.ONLINE);
+                            updateState("channel1", new StringType(data.toString()));
+                            toogleMe = false;
+
+                        }
+
+                    }
+                };
+
+                serialMessage.addListener(listener);
+
+                VotecSerialHandler.sendPackage(scanController.getPacket());
+
+                long cTime = System.currentTimeMillis();
+
+                while (System.currentTimeMillis() - cTime < 500) {
+                    // wait for 500 milisecond
+                }
+                if (toogleMe) {
+                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_OFFLINE, "recheck failed!");
+                    logger.warn("failed!");
+                    configurePort();
+                }
+
+                serialMessage.removeListener(listener);
+            }
+        };
+
+        checkController = scheduler.scheduleAtFixedRate(checkRunnable, 3, 10, TimeUnit.SECONDS);
 
     }
 
     public void initializePort() {
 
         serialMessage.addListener(this);
+
+        if (serialPort != null) {
+            serialPort.close();
+        }
+
+        IOUtils.closeQuietly(inputStream);
 
         Enumeration portList = CommPortIdentifier.getPortIdentifiers();
 
@@ -98,13 +156,14 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
             if (portIdentifier == null) {
                 logger.warn("port identifier null!");
+
                 continue;
             }
 
             try {
                 serialPort = portIdentifier.open(getThing().getThingTypeUID().getAsString(), 2000);
+
             } catch (PortInUseException e) {
-                // TODO Auto-generated catch block
                 logger.warn("port in use!");
                 serialPort = null;
                 continue;
@@ -140,8 +199,8 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
                 logger.warn("Serial Port I/O error!");
             }
 
-            VotecCommand newCommand = new VotecCommand();
-            newCommand.setBroadcast(1);
+            ScanController newCommand = new ScanController();
+
             VotecSerialHandler.sendPackage(newCommand.getPacket());
             long currentMilis = System.currentTimeMillis();
 
@@ -150,13 +209,19 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
             if (thing.getStatus().equals(ThingStatus.ONLINE)) {
                 logger.warn("On {} Votec Controller Discovered!", port);
+
                 break;
             } else {
                 serialPort.close();
                 IOUtils.closeQuietly(inputStream);
+                updateStatus(ThingStatus.UNKNOWN);
 
             }
 
+        }
+
+        if (!thing.getStatus().equals(ThingStatus.ONLINE)) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Controller Not Found");
         }
         serialMessage.removeListener(this);
     }
@@ -168,7 +233,12 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
             logger.warn("Votec Controller Recognized. Device ID: " + data.toString());
             updateStatus(ThingStatus.ONLINE);
             updateState("channel1", new StringType(data.toString()));
+            toogleMe = false;
 
+        } else if (data.isEmpty() && command.isEmpty()) {
+            serialPort.close();
+            IOUtils.closeQuietly(inputStream);
+            updateStatus(ThingStatus.UNKNOWN);
         }
 
     }
@@ -179,6 +249,11 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
         if (serialPort != null) {
             serialPort.close();
         }
+        if (checkController != null) {
+            checkController.cancel(true);
+            checkController = null;
+        }
+
         IOUtils.closeQuietly(inputStream);
     }
 
@@ -225,10 +300,10 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
                 try {
                     readBuffer = new ArrayList<Integer>();
 
-                    while (inputStream.available() > 0) {
-                        readBuffer.add(inputStream.read());
+                    while (serialPort.getInputStream().available() > 0) {
+                        readBuffer.add(serialPort.getInputStream().read());
                     }
-                    logger.warn("Input data: " + readBuffer);
+                    // logger.warn("Input data: " + readBuffer);
 
                     splitMessage(readBuffer);
 
@@ -240,6 +315,7 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
                 break;
             default:
+                logger.warn("something happened");
                 break;
         }
     }

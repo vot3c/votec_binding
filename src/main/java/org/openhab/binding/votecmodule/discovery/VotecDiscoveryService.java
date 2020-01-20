@@ -4,7 +4,6 @@ import static org.openhab.binding.votecmodule.internal.VotecModuleBindingConstan
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
 import org.openhab.binding.votecmodule.internal.CommandConstants;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
+import org.openhab.binding.votecmodule.internal.protocol.DiscoveryStartListener;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
 import org.openhab.binding.votecmodule.model.VotecCommand;
@@ -33,6 +33,8 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     private final Logger logger = LoggerFactory.getLogger(VotecDiscoveryService.class);
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_SAMPLE);
+
+    private static ArrayList<DiscoveryStartListener> listeners = new ArrayList<DiscoveryStartListener>();
 
     SerialMessage serialMessage = new SerialMessage();
 
@@ -53,11 +55,31 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     protected void startScan() {
         // TODO get all devices.
         logger.warn("Discovery started");
+        for (DiscoveryStartListener discoveryStartListener : listeners) {
+            discoveryStartListener.started();
+        }
+
         scanAvaibleNodes();
 
         VotecCommand scanCommand = new VotecCommand();
         scanCommand.setBroadcast(2);
         VotecSerialHandler.sendPackage(scanCommand.getPacket());
+
+    }
+
+    public static void addListener(DiscoveryStartListener mListener) {
+        synchronized (listeners) {
+            if (listeners.contains(mListener)) {
+                return;
+            }
+            listeners.add(mListener);
+        }
+    }
+
+    public static void removeListener(DiscoveryStartListener mListener) {
+        synchronized (listeners) {
+            listeners.remove(mListener);
+        }
 
     }
 
@@ -81,7 +103,6 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
         logger.warn("discovery stopped!");
         possibleNodes = null;
         avaibleNodeIndex = 0;
-        removeOlderResults(getTimestampOfLastScan());
     }
 
     @Override
@@ -91,7 +112,6 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
         logger.warn("discovery aborted!");
         possibleNodes = null;
         avaibleNodeIndex = 0;
-        removeOlderResults(getTimestampOfLastScan());
     }
 
     @Override
@@ -132,20 +152,18 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
         serialNumberString = serialNumberString.replace("]", "");
 
-        String timeStamp = Long.toString((new Date().getTime()));
-
         String thingType = getThingType(data.get(4));
 
         ThingUID bridgeUID = controller.getUID();
-        ThingUID thingUID = new ThingUID(new ThingTypeUID(thingType + ":" + timeStamp), "node_" + nodeIdString,
-                "hello");
+        ThingUID thingUID = new ThingUID(new ThingTypeUID(controller.getUID() + ":"), "node_" + nodeIdString,
+                thingType);
 
         // ThingUID thingUID = new ThingUID(VotecModuleBindingConstants.VOTEC_THING, controller.getUID(),thingType + "_"
         // + timeStamp);
 
         DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID)
                 .withThingType(new ThingTypeUID("votec", thingType)).withProperties(propertiesMap)
-                .withLabel("Votec Output Module: " + serialNumberString).withBridge(controller.getUID()).build();
+                .withLabel("Votec Output Module: " + "node " + nodeIdString).withBridge(controller.getUID()).build();
 
         thingDiscovered(discoveryResult);
 

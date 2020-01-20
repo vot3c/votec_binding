@@ -18,6 +18,7 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.model.VotecCommand;
+import org.openhab.binding.votecmodule.model.commands.TestMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,14 +44,14 @@ public class ModulesHandler extends ConfigStatusThingHandler {
 
         VotecCommand votecCommand = new VotecCommand();
 
-        votecCommand.setSerialnumber(packet);
-
         if ((boolean) thing.getConfiguration().get("testMode")) {
-            votecCommand.setGroupId(1);
+            votecCommand = new TestMode();
         } else {
             int nodeId = Integer.parseInt(thing.getProperties().get("node_id"));
             votecCommand.setDeviceId(nodeId);
         }
+
+        votecCommand.setSerialnumber(packet);
 
         String[] channelAtr = channelUID.getId().toString().split("_");
 

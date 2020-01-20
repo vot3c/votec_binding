@@ -17,12 +17,15 @@ import static org.openhab.binding.votecmodule.internal.VotecModuleBindingConstan
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
+import org.eclipse.smarthome.config.discovery.inbox.Inbox;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -34,7 +37,9 @@ import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.votecmodule.discovery.VotecDiscoveryService;
 import org.openhab.binding.votecmodule.handler.ModulesHandler;
 import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
-import org.openhab.binding.votecmodule.model.VotecCommand;
+import org.openhab.binding.votecmodule.internal.protocol.DiscoveryStartListener;
+import org.openhab.binding.votecmodule.model.commands.ScanBus;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -84,6 +89,15 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
             VotecDiscoveryService discoveryService = new VotecDiscoveryService((Bridge) thing);
             discoveryService.activate();
 
+            VotecDiscoveryService.addListener(new DiscoveryStartListener() {
+
+                @Override
+                public void started() {
+                    clearInbox();
+
+                }
+            });
+
             discoveryServiceRegs.put(controller.getThing().getUID(), bundleContext.registerService(
                     DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
 
@@ -95,6 +109,18 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
 
         return new ModulesHandler(thing);
 
+    }
+
+    public void clearInbox() {
+        ServiceReference<Inbox> cpr = bundleContext.getServiceReference(Inbox.class);
+        Inbox in = bundleContext.getService(cpr);
+        List<DiscoveryResult> list = in.getAll();
+
+        for (DiscoveryResult discoveryResult : list) {
+            ThingUID thingUID = discoveryResult.getThingUID();
+            in.remove(thingUID);
+
+        }
     }
 
     @Override
@@ -131,20 +157,16 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
             if (thing.getProperties().containsKey("node_id")) {
 
                 int deviceId = Integer.parseInt(thing.getProperties().get("node_id").toString());
+                // TODO: VotecCommand
+                ScanBus scanBus = new ScanBus();
 
-                VotecCommand command = new VotecCommand();
+                scanBus.setSerialnumber(DataConvertor.stringIntArrayToByteArray(serialNumber));
 
-                command.setSerialnumber(DataConvertor.stringIntArrayToByteArray(serialNumber));
+                scanBus.setDeviceId(deviceId);
 
-                command.setDeviceId(deviceId);
+                VotecSerialHandler.sendPackage(scanBus.getPacket());
 
-                command.setBroadcast(1);
-
-                command.setGroupId(1);
-
-                VotecSerialHandler.sendPackage(command.getPacket());
-
-                logger.warn(command.toString());
+                logger.warn(scanBus.toString());
 
             }
 
