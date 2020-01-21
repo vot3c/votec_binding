@@ -7,7 +7,7 @@
 
   
   
-   <thing-type id="votec_output_10" listed="false">
+  <thing-type id="votec_output_10" listed="false">
     <label>votec_output_module_10</label>
     <description>
       <![CDATA[
@@ -15,8 +15,6 @@
       ]]>
     </description>
     <category>Output Module</category>
-    
-    
 
     <config-description>
 		<parameter name="blindNumber" type="integer" required="true" min="0" max="5">
@@ -27,18 +25,50 @@
 		<parameter name="testMode" type="boolean">
              <label>Test Mod</label>
              <description>Cihaz test modunu aktifleştirir.</description>
-             <advanced>true</advanced>
-             <default>true</default>
+             <advanced>false</advanced>
+             <default>false</default>
        </parameter>
 		
     </config-description>
-     
+
+  </thing-type>
+
+
+  <thing-type id="votec_input_35" listed="true">
+    <label>votec_input_module_35</label>
+    <description>
+      <![CDATA[
+      Votec Input Module<br /><p>This Product can controller up to 35 device.</p>
+      ]]>
+    </description>
     
+     <channels>
+            <channel id="input35" typeId="input" />           
+    </channels>
     
   </thing-type>
-  
-  
-     <channel-type id="relay">
+
+<thing-type id="votec_input_20" listed="true">
+    <label>votec_input_module_20</label>
+    <description>
+      <![CDATA[
+      Votec Input Module<br /><p>This Product can controller up to 20 device.</p>
+      ]]>
+    </description>
+    
+    <channels>
+            <channel id="input20" typeId="input" />           
+    </channels>
+</thing-type>
+
+    <!-- Sample Channel Type -->
+    <channel-type id="input">
+        <item-type>Number</item-type>
+        <label>Input</label>
+        <description>Input Ports</description>
+    </channel-type>
+    
+    <channel-type id="relay">
         <item-type>Switch</item-type>
         <label>Button Event</label>
     </channel-type>

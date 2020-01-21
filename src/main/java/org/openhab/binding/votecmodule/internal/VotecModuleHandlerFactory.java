@@ -37,8 +37,8 @@ import org.eclipse.smarthome.io.transport.serial.SerialPortManager;
 import org.openhab.binding.votecmodule.discovery.VotecDiscoveryService;
 import org.openhab.binding.votecmodule.handler.ModulesHandler;
 import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
-import org.openhab.binding.votecmodule.internal.protocol.DiscoveryStartListener;
-import org.openhab.binding.votecmodule.model.commands.ScanBus;
+import org.openhab.binding.votecmodule.internal.protocol.OnDiscoveryStarted;
+import org.openhab.binding.votecmodule.model.commands.SetNodeId;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Component;
@@ -89,7 +89,7 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
             VotecDiscoveryService discoveryService = new VotecDiscoveryService((Bridge) thing);
             discoveryService.activate();
 
-            VotecDiscoveryService.addListener(new DiscoveryStartListener() {
+            VotecDiscoveryService.addListener(new OnDiscoveryStarted() {
 
                 @Override
                 public void started() {
@@ -125,7 +125,6 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     protected void removeHandler(ThingHandler thingHandler) {
-        // TODO Auto-generated method stub
         super.removeHandler(thingHandler);
         if (thingHandler instanceof VotecSerialHandler) {
             ServiceRegistration<?> serviceRegs = this.discoveryServiceRegs.get(thingHandler.getThing().getUID());
@@ -157,16 +156,14 @@ public class VotecModuleHandlerFactory extends BaseThingHandlerFactory {
             if (thing.getProperties().containsKey("node_id")) {
 
                 int deviceId = Integer.parseInt(thing.getProperties().get("node_id").toString());
-                // TODO: VotecCommand
-                ScanBus scanBus = new ScanBus();
 
-                scanBus.setSerialnumber(DataConvertor.stringIntArrayToByteArray(serialNumber));
+                SetNodeId setNodeId = new SetNodeId();
 
-                scanBus.setDeviceId(deviceId);
+                setNodeId.setSerialnumber(DataConvertor.stringIntArrayToByteArray(serialNumber));
 
-                VotecSerialHandler.sendPackage(scanBus.getPacket());
+                setNodeId.setDeviceId(deviceId);
 
-                logger.warn(scanBus.toString());
+                VotecSerialHandler.sendPackage(setNodeId.getPacket());
 
             }
 

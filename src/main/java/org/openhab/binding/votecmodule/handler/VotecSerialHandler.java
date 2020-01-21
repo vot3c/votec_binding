@@ -102,12 +102,10 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
 
                     @Override
                     public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
-                        if (DataConvertor.arrayToString(command).equals(CommandConstants.CONTROLLER_SET_ID)) {
-                            updateStatus(ThingStatus.ONLINE);
-                            updateState("channel1", new StringType(data.toString()));
-                            toogleMe = false;
 
-                        }
+                        updateStatus(ThingStatus.ONLINE);
+                        updateState("channel1", new StringType(data.toString()));
+                        toogleMe = false;
 
                     }
                 };
@@ -164,7 +162,7 @@ public class VotecSerialHandler extends VotecControllerHandler implements Serial
                 serialPort = portIdentifier.open(getThing().getThingTypeUID().getAsString(), 2000);
 
             } catch (PortInUseException e) {
-                logger.warn("port in use!");
+                logger.warn("port {} in use!", port);
                 serialPort = null;
                 continue;
             }

@@ -20,7 +20,7 @@ import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
 import org.openhab.binding.votecmodule.internal.CommandConstants;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
 import org.openhab.binding.votecmodule.internal.VotecModuleBindingConstants;
-import org.openhab.binding.votecmodule.internal.protocol.DiscoveryStartListener;
+import org.openhab.binding.votecmodule.internal.protocol.OnDiscoveryStarted;
 import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
 import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
 import org.openhab.binding.votecmodule.model.VotecCommand;
@@ -34,7 +34,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_SAMPLE);
 
-    private static ArrayList<DiscoveryStartListener> listeners = new ArrayList<DiscoveryStartListener>();
+    private static ArrayList<OnDiscoveryStarted> listeners = new ArrayList<OnDiscoveryStarted>();
 
     SerialMessage serialMessage = new SerialMessage();
 
@@ -55,8 +55,8 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     protected void startScan() {
         // TODO get all devices.
         logger.warn("Discovery started");
-        for (DiscoveryStartListener discoveryStartListener : listeners) {
-            discoveryStartListener.started();
+        for (OnDiscoveryStarted onDiscoveryStarted : listeners) {
+            onDiscoveryStarted.started();
         }
 
         scanAvaibleNodes();
@@ -67,7 +67,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
     }
 
-    public static void addListener(DiscoveryStartListener mListener) {
+    public static void addListener(OnDiscoveryStarted mListener) {
         synchronized (listeners) {
             if (listeners.contains(mListener)) {
                 return;
@@ -76,7 +76,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
         }
     }
 
-    public static void removeListener(DiscoveryStartListener mListener) {
+    public static void removeListener(OnDiscoveryStarted mListener) {
         synchronized (listeners) {
             listeners.remove(mListener);
         }
@@ -176,7 +176,11 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
             case 20:
                 thingType = "votec_output_10";
                 break;
-
+            case 10:
+                thingType = "votec_input_35";
+                break;
+            case 11:
+                thingType = "votec_input_20";
             default:
                 break;
         }

@@ -131,7 +131,19 @@ public class ChannelHandler {
 
         // TODO: Implement with more types.
 
-        String acceptedItemType = mType.equals("blind") ? "Rollershutter" : "Switch";
+        String acceptedItemType = "String";
+        switch (mType) {
+            case "blind":
+                acceptedItemType = "RollerShutter";
+                break;
+            case "relay":
+                acceptedItemType = "Switch";
+                break;
+            case "input":
+                acceptedItemType = "Number";
+            default:
+                break;
+        }
 
         ChannelKind kind = ChannelKind.STATE;
 

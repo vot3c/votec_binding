@@ -1,6 +1,6 @@
 package org.openhab.binding.votecmodule.internal.protocol;
 
-public interface DiscoveryStartListener {
+public interface OnDiscoveryStarted {
 
     void started();
 }

@@ -31,6 +31,14 @@ public class VotecCommand {
         }
     }
 
+    public boolean setData5(int in) {
+        if (data != null) {
+            data[5] = (byte) in;
+            return true;
+        }
+        return false;
+    }
+
     public VotecCommand(byte[] mPacket) {
         this.packet = mPacket;
     }
