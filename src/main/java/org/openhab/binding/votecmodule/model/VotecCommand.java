@@ -18,6 +18,23 @@ public class VotecCommand {
         header[1] = 0x2A;
     }
 
+    public VotecCommand(byte[] data) {
+        this.packet = data;
+        command = new byte[4];
+        this.data = new byte[8];
+        header[0] = 0x56;
+        header[1] = 0x2A;
+        for (int i = 0; i < data.length; i++) {
+            if (i < 4) {
+                command[i] = packet[i];
+            } else if (i > 3 && i < 12) {
+                this.data[i - 4] = packet[i];
+            }
+        }
+        buildPacket();
+
+    }
+
     public void buildPacket() {
         for (int i = 0; i < 14; i++) {
             if (i < 2) {
@@ -39,8 +56,8 @@ public class VotecCommand {
         return false;
     }
 
-    public VotecCommand(byte[] mPacket) {
-        this.packet = mPacket;
+    public byte getData5() {
+        return data[5];
     }
 
     public boolean setData(byte[] data) {

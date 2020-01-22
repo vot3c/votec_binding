@@ -20,18 +20,52 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.votecmodule.internal.DataConvertor;
+import org.openhab.binding.votecmodule.internal.protocol.SerialMessage;
+import org.openhab.binding.votecmodule.internal.protocol.VotecEventListener;
 import org.openhab.binding.votecmodule.model.VotecCommand;
 import org.openhab.binding.votecmodule.model.commands.OutputModule;
 import org.openhab.binding.votecmodule.model.commands.TestMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ModulesHandler extends ConfigStatusThingHandler {
+public class ModulesHandler extends ConfigStatusThingHandler implements VotecEventListener {
 
     private final Logger logger = LoggerFactory.getLogger(ModulesHandler.class);
+    SerialMessage message;
 
     public ModulesHandler(Thing thing) {
         super(thing);
+    }
+
+    @Override
+    public void initialize() {
+        logger.warn("{} initialized!", thing.getLabel());
+
+        message = new SerialMessage();
+
+        Runnable configureRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                configureChannels();
+
+            }
+        };
+
+        Thread configureThread = new Thread(configureRunnable);
+
+        configureThread.start();
+
+        updateStatus(ThingStatus.ONLINE);
+
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        message.removeListener(this);
+
     }
 
     @Override
@@ -137,28 +171,6 @@ public class ModulesHandler extends ConfigStatusThingHandler {
 
     }
 
-    @Override
-    public void initialize() {
-        logger.warn("{} initialized!", thing.getLabel());
-
-        Runnable configureRunnable = new Runnable() {
-
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                configureChannels();
-
-            }
-        };
-
-        Thread configureThread = new Thread(configureRunnable);
-
-        configureThread.start();
-
-        updateStatus(ThingStatus.ONLINE);
-
-    }
-
     public void configureChannels() {
         Thing mThing = null;
 
@@ -170,16 +182,21 @@ public class ModulesHandler extends ConfigStatusThingHandler {
                 return;
 
             case "votec:votec_input_20":
-
+                message.addListener(this);
                 return;
 
             case "votec:votec_input_35":
-
+                message.addListener(this);
                 return;
 
             default:
                 return;
         }
+    }
+
+    @Override
+    public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
+
     }
 
     public void configureOutputChannels() {

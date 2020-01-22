@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Automatic-Module-Name: org.openhab.binding.votec
-Bnd-LastModified: 1579614807782
+Bnd-LastModified: 1579698872287
 Bundle-Description: This project contains the official add-ons of open
  HAB
 Bundle-Developers: openhab;email="info@openhab.org";name=openHAB;organ
@@ -20,7 +20,7 @@ Bundle-SCM: url="https://github.com/openhab/openhab-addons/org.openhab
  actor.bundles/org.openhab.binding.votec",tag=HEAD
 Bundle-SymbolicName: org.openhab.binding.votec
 Bundle-Vendor: openHAB.org
-Bundle-Version: 2.5.1.202001211353
+Bundle-Version: 2.5.1.202001221314
 Created-By: 1.8.0_231 (Oracle Corporation)
 Export-Package: org.openhab.binding.votecmodule.discovery;version="2.5
  .1";uses:="org.eclipse.smarthome.config.discovery,org.eclipse.smartho

@@ -8,12 +8,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.votecmodule.handler.VotecSerialHandler;
@@ -42,7 +46,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
     ArrayList<Byte> possibleNodes;
 
-    int avaibleNodeIndex = 0;
+    static boolean fromScan = false;
 
     public VotecDiscoveryService(Bridge thing) {
         // TODO Auto-generated constructor stub
@@ -54,6 +58,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     @Override
     protected void startScan() {
         // TODO get all devices.
+        fromScan = true;
         logger.warn("Discovery started");
         for (OnDiscoveryStarted onDiscoveryStarted : listeners) {
             onDiscoveryStarted.started();
@@ -93,6 +98,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
         // TODO Auto-generated method stub
         super.deactivate();
         logger.warn("discovery deactivated!");
+        fromScan = false;
         serialMessage.removeListener(this);
     }
 
@@ -100,25 +106,50 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
     protected synchronized void stopScan() {
         // TODO Auto-generated method stub
         super.stopScan();
-        logger.warn("discovery stopped!");
+        if (fromScan) {
+            healNotFoundDevices();
+        }
+        fromScan = false;
         possibleNodes = null;
-        avaibleNodeIndex = 0;
+        logger.warn("stop scan");
     }
 
     @Override
     public synchronized void abortScan() {
         // TODO Auto-generated method stub
         super.abortScan();
-        logger.warn("discovery aborted!");
+        logger.warn("abort");
+        fromScan = false;
         possibleNodes = null;
-        avaibleNodeIndex = 0;
     }
 
     @Override
     public void VotecIncomingEvent(ArrayList<Integer> command, ArrayList<Integer> data) {
         // TODO Auto-generated method stub
         if (DataConvertor.arrayToString(command).equals(CommandConstants.SCAN_NETWORK_RESULT)) {
-            addDevice(data);
+            scanAvaibleNodes();
+
+            if (fromScan) {
+                addDevice(data);
+                logger.warn("from scan");
+            } else {
+                startScan();
+
+                Runnable stopScanRunnable = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        stopScan();
+
+                    }
+                };
+
+                scheduler.schedule(stopScanRunnable, VotecModuleBindingConstants.TIMEOUT, TimeUnit.SECONDS);
+
+                logger.warn("from device");
+
+            }
+
         }
     }
 
@@ -136,9 +167,7 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
             return;
         }
 
-        String nodeIdString = Byte.toString((possibleNodes.get(avaibleNodeIndex)));
-
-        avaibleNodeIndex++;
+        String nodeIdString = Byte.toString((possibleNodes.get(0)));
 
         Map<String, Object> propertiesMap = new HashMap<String, Object>();
 
@@ -154,7 +183,6 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
         String thingType = getThingType(data.get(4));
 
-        ThingUID bridgeUID = controller.getUID();
         ThingUID thingUID = new ThingUID(new ThingTypeUID(controller.getUID() + ":"), "node_" + nodeIdString,
                 thingType);
 
@@ -201,8 +229,6 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
 
         }
 
-        logger.warn("unavaible nodes: " + nodes.toString());
-
         possibleNodes = new ArrayList<Byte>();
 
         for (byte i = 1; i < 127; i++) {
@@ -213,9 +239,9 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
             }
         }
 
-        logger.warn("avaible nodes: " + possibleNodes.toString());
-
     }
+
+    static ArrayList<String> isOnline = new ArrayList<String>();
 
     public boolean hasDiscovered(String serialNumber) {
 
@@ -228,13 +254,36 @@ public class VotecDiscoveryService extends AbstractDiscoveryService implements V
                 String mSerialNumber = thing.getProperties().get("serial_number");
 
                 if (mSerialNumber.equals(serialNumber)) {
+                    isOnline.add(mSerialNumber);
+                    logger.warn("already discovered: " + isOnline.toString());
                     return true;
+
                 }
 
             }
         }
 
         return false;
+    }
+
+    public void healNotFoundDevices() {
+        List<Thing> things = controller.getThings();
+        for (Thing thing : things) {
+            if (thing.getProperties().containsKey("serial_number")) {
+                String mSerialNumber = thing.getProperties().get("serial_number");
+                if (!isOnline.contains(mSerialNumber)) {
+                    // TODO: ask device that is it still avaliable
+                    // if not set status to OFFLINE
+                    thing.setStatusInfo(new ThingStatusInfo(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                            "device lost!"));
+                } else {
+                    logger.warn("setting status to online!");
+                    thing.setStatusInfo(new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, null));
+                }
+            }
+        }
+        isOnline = new ArrayList<String>();
+
     }
 
 }

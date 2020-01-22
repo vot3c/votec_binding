@@ -51,4 +51,14 @@ public class DataConvertor {
         return newByteArr;
     }
 
+    static public byte[] intArrayToByteArray(ArrayList<Integer> data) {
+        byte[] out = new byte[data.size()];
+
+        for (int i = 0; i < data.size(); i++) {
+            out[i] = data.get(i).byteValue();
+        }
+
+        return out;
+    }
+
 }
